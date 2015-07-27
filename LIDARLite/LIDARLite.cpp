@@ -234,8 +234,8 @@ int LIDARLite::velocity(char LidarLiteI2cAddress){
 /* =============================================================================
   Correlation Record
   =========================================================================== */
-byte* LIDARLite::correlationRecord(int numberOfReadings, char LidarLiteI2cAddress){
-  byte *correlationRecord;
+int* LIDARLite::correlationRecord(int numberOfReadings, char LidarLiteI2cAddress){
+  int *correlationRecord;
   byte my_read_val[2];
   int my_Value = 0;
   write(0x5d,0xc0,LidarLiteI2cAddress); // selects memory bank
@@ -243,13 +243,35 @@ byte* LIDARLite::correlationRecord(int numberOfReadings, char LidarLiteI2cAddres
   for(int i = 0; i<numberOfReadings; i++){
     read(0xd2,2,my_read_val,false,LidarLiteI2cAddress); // added to select single byte
     my_Value = (int)my_read_val[0];
-    if(my_read_val[1] ==1){ // if upper byte lsb is set, the value is negative
+    if((int)my_read_val[1] == 1){ // if upper byte lsb is set, the value is negative
       my_Value |= 0xff00;
     }
+    Serial.println(my_Value);
     correlationRecord[i] = my_Value;
   }
   write(0x40,0x00,LidarLiteI2cAddress); // Null command to control register
   return correlationRecord;
+
+  // numberOfReadings = 0;
+  // int elements[] = {256,384,512,640,768,896,1024};
+  // byte my_read_val[2];
+  // int my_Value = 0;
+  //
+  // //llWireWrite(0x51,0x10); // points to the base of the correlation record address
+  // llWireWrite(0x5d,0xc0); // selects memory bank
+  // llWireWrite(0x40, 0x07); // sets test mode select
+  //
+  // for(int i = 0; i<300; i++){
+  //   llWireReadCR(0xd2,2,my_read_val); // added to select single byte
+  //   my_Value = (int)my_read_val[0];
+  //   if(my_read_val[1] ==1){ // if upper byte lsb is set, the value is negative
+  //     my_Value |= 0xff00;
+  //   }
+  //   Serial.print(my_Value);
+  //   Serial.println("*");
+  // }
+  // llWireWrite(0x40,0x00); // Null command to control register
+  // Serial.println(999999);
 }
 
 /* =============================================================================
@@ -282,9 +304,12 @@ void LIDARLite::write(char myAddress, char myValue, char LidarLiteI2cAddress){
 /* =============================================================================
   =========================================================================== */
 void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool monitorBusyFlag, char LidarLiteI2cAddress){
-  int busyFlag = 1;
+  int busyFlag = 0;
+  if(monitorBusyFlag){
+    int busyFlag = 1;
+  }
   int busyCounter = 0;
-  while(busyFlag != 0 && monitorBusyFlag){
+  while(busyFlag != 0){
     Wire.beginTransmission((int)LidarLiteI2cAddress);
     Wire.write(0x01);
     int nackCatcher = Wire.endTransmission();
@@ -319,11 +344,11 @@ void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool m
       goto bailout;
     }
   }
-  if(busyFlag == 0 || !monitorBusyFlag){
+  if(busyFlag == 0){
     Wire.beginTransmission((int)LidarLiteI2cAddress);
     Wire.write((int)myAddress);
     int nackCatcher = Wire.endTransmission();
-    //if(nackCatcher != 0){Serial.println("NACK");}
+    if(nackCatcher != 0){Serial.println("NACK");}
     Wire.requestFrom((int)LidarLiteI2cAddress, numOfBytes);
     int i = 0;
     if(numOfBytes <= Wire.available()){

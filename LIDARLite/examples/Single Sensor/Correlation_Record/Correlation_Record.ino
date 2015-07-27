@@ -10,7 +10,7 @@
 #include <LIDARLite.h>
 
 LIDARLite myLidarLite;
-byte *correlationRecordArray;
+int *correlationRecordArray;
 
 void setup() {
   Serial.begin(115200);

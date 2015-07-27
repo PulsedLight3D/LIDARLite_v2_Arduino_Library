@@ -10,7 +10,7 @@ class LIDARLite
       int distance(bool = true, bool = true, char = 0x62);
       void scale(char, char = 0x62);
       int velocity(char = 0x62);
-      unsigned char* correlationRecord(int = 256, char = 0x62);
+      int* correlationRecord(int = 256, char = 0x62);
       void write(char, char, char = 0x62);
       void read(char, int, byte*, bool, char);
   private:
