@@ -77,7 +77,7 @@ LIDARLite::LIDARLite(){}
 ============================================================================= */
 void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, char LidarLiteI2cAddress){
   errorReporting = showErrorReporting;
-  Wire.begin();
+  Wire.begin(); //  Start I2C
   if(fasti2c){
     #if ARDUINO >= 157
       Wire.setClock(400000UL); // Set I2C frequency to 400kHz, for the Due
@@ -86,9 +86,10 @@ void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, 
     #endif
   }
   switch (configuration){
-    case 0:
+    case 0: //  Default configuration
     break;
-    case 1:
+    case 1: //  Set aquisition count to 1/3 default value, faster reads, slightly
+            //  noisier values
       write(0x04,0x00,LidarLiteI2cAddress);
     break;
   }
@@ -121,35 +122,45 @@ void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, 
   Example Arduino Usage
   ------------------------------------------------------------------------------
   1.  // take a reading with DC stabilization and the 0x62 default i2c address
-      myLidarLiteInstance.distance();
+      // the distance variable will hold the distance
+      int distance = 0
+      distance = myLidarLiteInstance.distance();
 
   2.  // take a reading without DC stabilization and the 0x62 default i2c address
-      myLidarLiteInstance.distance(false);
+      int distance = 0
+      distance = myLidarLiteInstance.distance(false);
 
   3.  // take a reading with DC stabilization and a custom i2c address of 0x66
-      myLidarLiteInstance.distance(true,0x66);
+      int distance = 0
+      distance = myLidarLiteInstance.distance(true,0x66);
 
   Notes
   ------------------------------------------------------------------------------
     Autoincrement: A note about 0x8f vs 0x0f
-    | Set the highest bit of any register to "1" if you set the high byte of a
-    | register and then take succesive readings from that register, then LIDAR-
-    | Lite automatically increments the register one for each read. An example:
-    | If we want to read the high and low bytes for the distance, we could take
-    | two single readings from 0x0f and 0x10, or we could take 2 byte read from
-    | register 0x8f. 0x8f = 10001111 and 0x0f = 00001111, meaning that 0x8f is
-    | 0x0f with the high byte set to "1", ergo it autoincrements.
+
+    Set the highest bit of any register to "1" if you set the high byte of a
+    register and then take succesive readings from that register, then LIDAR-
+    Lite automatically increments the register one for each read. An example: If
+    we want to read the high and low bytes for the distance, we could take two
+    single readings from 0x0f and 0x10, or we could take 2 byte read from reg-
+    ister 0x8f. 0x8f = 10001111 and 0x0f = 00001111, meaning that 0x8f is 0x0f
+    with the high byte set to "1", ergo it autoincrements.
 
 ============================================================================= */
 int LIDARLite::distance(bool stablizePreampFlag, bool takeReference, char LidarLiteI2cAddress){
   if(stablizePreampFlag){
-    write(0x00,0x04,LidarLiteI2cAddress); // Take acquisition & correlation processing with DC correction
+    // Take acquisition & correlation processing with DC correction
+    write(0x00,0x04,LidarLiteI2cAddress);
   }else{
-    write(0x00,0x03,LidarLiteI2cAddress); // Take acquisition & correlation processing without DC correction
+    // Take acquisition & correlation processing without DC correction
+    write(0x00,0x03,LidarLiteI2cAddress);
   }
-  byte distanceArray[2]; // Array to store high and low bytes of distance
-  read(0x8f,2,distanceArray,true,LidarLiteI2cAddress); // Read two bytes from register 0x8f. (See autoincrement note above)
-  int distance = (distanceArray[0] << 8) + distanceArray[1]; // Shift high byte and add to low byte
+  // Array to store high and low bytes of distance
+  byte distanceArray[2];
+  // Read two bytes from register 0x8f. (See autoincrement note above)
+  read(0x8f,2,distanceArray,true,LidarLiteI2cAddress);
+  // Shift high byte and add to low byte
+  int distance = (distanceArray[0] << 8) + distanceArray[1];
   return(distance);
 }
 
@@ -179,13 +190,16 @@ int LIDARLite::distance(bool stablizePreampFlag, bool takeReference, char LidarL
   ------------------------------------------------------------------------------
   1.  // By default you don't need to set the scaling value, the sensor defaults
       // to 0xC8 for register 0x68 or 0.10m/s
+
   2.  // Set the velocity scaling to 1m/s
       myLidarLiteInstance.scale(4);
 
   =========================================================================== */
 
 void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
+  //  Array of velocity scaling values
   unsigned char scale[] = {0xC8, 0x50, 0x28, 0x14};
+  //  Write scaling value to register 0x68 to set
   write(0x68,scale[velocityScalingValue],LidarLiteI2cAddress);
 }
 
@@ -217,75 +231,215 @@ void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
 
   Example Usage
   ------------------------------------------------------------------------------
-  1.  // Basic usage with default i2c address
-      myLidarLiteInstance.velocity();
-  2.  // Get velocity with custom i2c address of 0x66
-      myLidarLiteInstance.velocity(0x66);
+  1.  //  Basic usage with default i2c address, the velocity variable will hold
+      //  the velocity measurement
+      int velocity = 0;
+      velocity = myLidarLiteInstance.velocity();
+
+  2.  //  Get velocity with custom i2c address of 0x66
+      int velocity = 0;
+      velocity = myLidarLiteInstance.velocity(0x66);
 
   =========================================================================== */
 int LIDARLite::velocity(char LidarLiteI2cAddress){
-  write(0x00,0x04,LidarLiteI2cAddress); // Write 0x04 to register 0x00 to start getting distance readings
-  write(0x04,0x80,LidarLiteI2cAddress); // Write 0x80 to 0x04 to switch on velocity mode
-  byte myArray[1]; // Array to store bytes from read function
-  read(0x09,1,myArray,true,LidarLiteI2cAddress); // Read 1 byte from register 0x09 to get velocity measurement
-  return((int)((char)myArray[0])); // Convert 1 byte to char and then to int to get signed int value for velocity measurement
+  //  Write 0x04 to register 0x00 to start getting distance readings
+  write(0x00,0x04,LidarLiteI2cAddress);
+  //  Write 0x80 to 0x04 to switch on velocity mode
+  write(0x04,0x80,LidarLiteI2cAddress);
+  //  Array to store bytes from read function
+  byte velocityArray[1];
+  //  Read 1 byte from register 0x09 to get velocity measurement
+  read(0x09,1,velocityArray,true,LidarLiteI2cAddress);
+  //  Convert 1 byte to char and then to int to get signed int value for velo-
+  //  city measurement
+  return((int)((char)velocityArray[0]));
+}
+
+/* =============================================================================
+  Signal Strength
+
+  The sensor transmits a focused infrared beam that reflects off of a target,
+  with a portion of that reflected signal returning to the receiver. Distance
+  can be calculated by taking the difference between the moment of signal trans-
+  mission to the moment of signal reception. But successfully receiving a ref-
+  lected signal is heavily influenced by several factors. These factors include:
+  target distance, target size, aspect, reflectivity
+
+  The relationship of distance (D) to returned signal strength is an inverse
+  square. So, with increase in distance, returned signal strength decreases by
+  1/D^2 or the square root of the distance.
+
+  Additionally, the relationship of a target's Cross Section (C) to returned
+  signal strength is an inverse power of 4.  The LIDAR-Lite sensor transmits a
+  focused near-infrared laser beam that spreads at a rate of approximately .5º
+  as distance increases. Up to 1 meter it is about the size of the lens. Beyond
+  1 meter, approximate beam spread in degrees can be estimated by dividing the
+  distance by 100, or ~8 milliradians. When the beam overfills (is larger than)
+  the target, the signal returned decreases by 1/C^4 or the fourth root of the
+  target's cross section.
+
+  The aspect of the target, or its orientation to the sensor, affects the obser-
+  vable cross section and, therefore, the amount of returned signal decreases as
+  the aspect of the target varies from the normal.
+
+  Reflectivity characteristics of the target's surface also affect the amount of
+  returned signal. In this case, we concern ourselves with reflectivity of near
+  infrared wavelengths.
+
+  Process
+  ------------------------------------------------------------------------------
+  1.  Read one byte from 0x0e
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite
+    address. If you change the address, fill it in here.
+
+  Example Usage
+  ------------------------------------------------------------------------------
+  1.  //  Basic usage with default i2c address, the signalStrength variable will
+      //  hold the signalStrength measurement
+      int signalStrength = 0;
+      signalStrength = myLidarLiteInstance.signalStrength();
+
+  =========================================================================== */
+int LIDARLite::signalStrength(char LidarLiteI2cAddress){
+  //  Array to store read value
+  byte signalStrengthArray[1];
+  //  Read one byte from 0x0e
+  read(0x0e, 1, signalStrengthArray, false, 0x62);
+  return((int)((unsigned char)signalStrengthArray[0]));
 }
 
 /* =============================================================================
   Correlation Record
+
+  Distance measurements are based on the storage and processing of reference and
+  signal correlation records. The correlation waveform has a bipolar wave shape,
+  transitioning from a positive going portion to a roughly symmetrical negative
+  going pulse. The point where the signal crosses zero represents the effective
+  delay for the reference and return signals. Processing with the SPC determines
+  the interpolated crossing point to a 1cm resolution along with the peak signal
+  value.
+
+  Process
+  ------------------------------------------------------------------------------
+  1.  Take a distance reading (there is no correlation record without at least
+      one distance reading being taken)
+  2.  Select memory bank by writing 0xc0 to register 0x5d
+  3.  Set test mode select by writing 0x07 to register 0x40
+  4.  For as many readings as you want to take (max is 1024)
+      1.  Read two bytes from 0xd2
+      2.  The Low byte is the value from the record
+      3.  The high byte is the sign from the record
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - numberOfReadings (optional): default is 256, max is 1024
+  - LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite
+    address. If you change the address, fill it in here.
+
+  Example Usage
+  ------------------------------------------------------------------------------
+  1.  // Default usage, correlationRecordArray will hold the correlation record
+      int *correlationRecordArray;
+      myLidarLiteInstance.distance();
+      correlationRecordArray = myLidarLiteInstance.correlationRecord();
+
   =========================================================================== */
 int* LIDARLite::correlationRecord(int numberOfReadings, char LidarLiteI2cAddress){
-  int *correlationRecord;
-  byte my_read_val[2];
-  int my_Value = 0;
-  write(0x5d,0xc0,LidarLiteI2cAddress); // selects memory bank
-  write(0x40, 0x07,LidarLiteI2cAddress); // sets test mode select
+  int correlationRecord[numberOfReadings];
+  // Array to store read values
+  byte correlationArray[2];
+  // Var to store value of correlation record
+  int correlationValue = 0;
+  //  Selects memory bank
+  write(0x5d,0xc0,LidarLiteI2cAddress);
+  // Sets test mode select
+  write(0x40, 0x07,LidarLiteI2cAddress);
   for(int i = 0; i<numberOfReadings; i++){
-    read(0xd2,2,my_read_val,false,LidarLiteI2cAddress); // added to select single byte
-    my_Value = (int)my_read_val[0];
-    if((int)my_read_val[1] == 1){ // if upper byte lsb is set, the value is negative
-      my_Value |= 0xff00;
+    // Select single byte
+    read(0xd2,2,correlationArray,false,LidarLiteI2cAddress);
+    //  Low byte is the value of the correlation record
+    correlationValue = (int)correlationArray[0];
+    // if upper byte lsb is set, the value is negative
+    if((int)correlationArray[1] == 1){
+      correlationValue |= 0xff00;
     }
-    Serial.println(my_Value);
-    correlationRecord[i] = my_Value;
+    correlationRecord[i] = correlationValue;
   }
-  write(0x40,0x00,LidarLiteI2cAddress); // Null command to control register
+  // Send null command to control register
+  write(0x40,0x00,LidarLiteI2cAddress);
   return correlationRecord;
-
-  // numberOfReadings = 0;
-  // int elements[] = {256,384,512,640,768,896,1024};
-  // byte my_read_val[2];
-  // int my_Value = 0;
-  //
-  // //llWireWrite(0x51,0x10); // points to the base of the correlation record address
-  // llWireWrite(0x5d,0xc0); // selects memory bank
-  // llWireWrite(0x40, 0x07); // sets test mode select
-  //
-  // for(int i = 0; i<300; i++){
-  //   llWireReadCR(0xd2,2,my_read_val); // added to select single byte
-  //   my_Value = (int)my_read_val[0];
-  //   if(my_read_val[1] ==1){ // if upper byte lsb is set, the value is negative
-  //     my_Value |= 0xff00;
-  //   }
-  //   Serial.print(my_Value);
-  //   Serial.println("*");
-  // }
-  // llWireWrite(0x40,0x00); // Null command to control register
-  // Serial.println(999999);
 }
 
 /* =============================================================================
+  Change I2C Address for Single Sensor
+
+  LIDAR-Lite now has the ability to change the I2C address of the sensor and
+  continue to use the default address or disable it. This function only works
+  for single sensors. When the sensor powers off and restarts this value will
+  be lost and will need to be configured again.
+
+  There are only certain address that will work with LIDAR-Lite so be sure to
+  review the "Notes" section below
+
+  Process
+  ------------------------------------------------------------------------------
+  1.  Read the two byte serial number from register 0x96
+  2.  Write the low byte of the serial number to 0x18
+  3.  Write the high byte of the serial number to 0x19
+  4.  Write the new address you want to use to 0x1a
+  5.  Choose wheather to user the default address or not (you must to one of the
+      following to commit the new address):
+      1.  If you want to keep the default address, write 0x00 to register 0x1e
+      2.  If you do not want to keep the default address write 0x08 to 0x1e
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - newI2cAddress: the hex value of the I2C address you want the sensor to have
+  - disablePrimaryAddress (optional): true/false value to disable the primary
+    address, default is false (i.e. leave primary active)
+  - currentLidarLiteAddress (optional): the default is 0x62, but can also be any
+    value you have previously set (ex. if you set the address to 0x66 and dis-
+    abled the default address then needed to change it, you would use 0x66 here)
+
+  Example Usage
+  ------------------------------------------------------------------------------
+  1.  //  Set the value to 0x66 with primary address active and starting with
+      //  0x62 as the current address
+      myLidarLiteInstance.changeAddress(0x66);
+
+  Notes
+  ------------------------------------------------------------------------------
+    Possible Address for LIDAR-Lite
+
+    7-bit address in binary form need to end in "0". Example: 0x62 = 01100010 so
+    that works well for us. Essentially any even numbered hex value will work
+    for 7-bit address.
+
+    8-bit read address in binary form need to end in "00". Example: the default
+    8-bit read address for LIDAR-Lite is 0xc4 = 011000100. Essentially any hex
+    value evenly divisable by "4" will work.
+
+
   =========================================================================== */
-unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryAddress, char LidarLiteDefaultAddress){
+unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryAddress, char currentLidarLiteAddress){
+  //  Array to save the serial number
   unsigned char serialNumber[2];
-  read(0x96,2,serialNumber,false,LidarLiteDefaultAddress);
-  write(0x18,serialNumber[0],LidarLiteDefaultAddress);
-  write(0x19,serialNumber[1],LidarLiteDefaultAddress);
-  write(0x1a,newI2cAddress,LidarLiteDefaultAddress);
+  //  Read two bytes from 0x96 to get the serial number
+  read(0x96,2,serialNumber,false,currentLidarLiteAddress);
+  //  Write the low byte of the serial number to 0x18
+  write(0x18,serialNumber[0],currentLidarLiteAddress);
+  //  Write the high byte of the serial number of 0x19
+  write(0x19,serialNumber[1],currentLidarLiteAddress);
+  //  Write the new address to 0x1a
+  write(0x1a,newI2cAddress,currentLidarLiteAddress);
+  //  Choose whether or not to use the default address of 0x62
   if(disablePrimaryAddress){
-    write(0x1e,0x08,LidarLiteDefaultAddress);
+    write(0x1e,0x08,currentLidarLiteAddress);
   }else{
-    write(0x1e,0x00,LidarLiteDefaultAddress);
+    write(0x1e,0x00,currentLidarLiteAddress);
   }
   return newI2cAddress;
 }
