@@ -1,10 +1,14 @@
-//  # LIDAR-Lite v2: Change the I2C address of a single sensor.
-//
-//  This example demonstrates how to chage the i2c address of a single sensor.
-//
-//  The library is in BETA, so subscribe to the github repo to recieve updates, or just check in periodically
-//  https://github.com/PulsedLight3D/LIDARLite_v2_Arduino_Library
-//  To learn more read over lidarlite.cpp as each function is commented
+/* =============================================================================
+  LIDAR-Lite v2: Change the I2C address of a single sensor.
+
+  This example demonstrates how to chage the i2c address of a single sensor.
+
+  The library is in BETA, so subscribe to the github repo to recieve updates, or
+  just check in periodically:
+  https://github.com/PulsedLight3D/LIDARLite_v2_Arduino_Library
+
+  To learn more read over lidarlite.cpp as each function is commented
+=========================================================================== */
 
 #include <Wire.h>
 #include <LIDARLite.h>

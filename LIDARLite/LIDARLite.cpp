@@ -97,7 +97,64 @@ void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, 
 
 /* =============================================================================
 
+  Begin Continuous
+
+  Continuous mode allows you to tell the sensor to take a certain number (or
+  infinite) readings allowing you to read from it at a continuous rate. There is
+  also an option to tell the mode pin to go low when a new reading is availble.
+
+  Process
+  ------------------------------------------------------------------------------
+  1.  Write our interval to register 0x45
+  2.  Write 0x20 or 0x21 (if we want the mode pin to pull low when a new reading
+      is availble) to register 0x04
+  3.  Write the number of readings we want to take to register 0x11
+  4.  Write 0x04 to register 0x00 to begin taking measurements
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - modePinLow (optional): default is true, if true the Mode pin will pull low
+    when a new measurement is availble
+  - interval (optional): set the time between measurements, default is 0x04
+  - numberOfReadings(optional): sets the number of readings to take before stop-
+    ping (Note: even though the sensor will stop taking new readings, 0x8f will
+    still read back the last recorded value), default value is 0xff (which sets
+    the sensor to take infinite readings without stopping). Minimum value for
+    operation is 0x02.
+  - LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite
+    address. If you change the address, fill it in here.
+
+  Example Arduino Usage
+  ------------------------------------------------------------------------------
+  1.  // Setup I2C then setup continuous mode
+      myLidarLiteInstance.begin();
+      myLidarLiteInstance.beginContinuous();
+
+============================================================================= */
+void LIDARLite::beginContinuous(bool modePinLow, char interval, char numberOfReadings,char LidarLiteI2cAddress){
+  //  Register 0x45 sets the time between measurements. 0xc8 corresponds to 10Hz
+  //  while 0x13 corresponds to 100Hz. Minimum value is 0x02 for proper
+  //  operation.
+  write(0x45,interval,LidarLiteI2cAddress);
+  //  Set register 0x04 to 0x20 to look at "NON-default" value of velocity scale
+  //  If you set bit 0 of 0x04 to "1" then the mode pin will be low when done
+  if(modePinLow){
+    write(0x04,0x21,LidarLiteI2cAddress);
+  }else{
+    write(0x04,0x20,LidarLiteI2cAddress);
+  }
+  //  Set the number of readings, 0xfe = 254 readings, 0x01 = 1 reading and
+  //  0xff = continuous readings
+  write(0x11,numberOfReadings,LidarLiteI2cAddress);
+  //  Initiate reading distance
+  write(0x00,0x04,LidarLiteI2cAddress);
+}
+
+/* =============================================================================
+
   Distance
+
+  Read the distance from LIDAR-Lite
 
   Process
   ------------------------------------------------------------------------------
@@ -164,6 +221,36 @@ int LIDARLite::distance(bool stablizePreampFlag, bool takeReference, char LidarL
   return(distance);
 }
 
+/* =============================================================================
+
+  Distance Continuous
+
+  Reading distance while in continuous mode is as easy as reading 2 bytes from
+  register 0x8f
+
+  Process
+  ------------------------------------------------------------------------------
+  1.  Read 2 bytes from 0x8f
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite
+    address. If you change the address, fill it in here.
+
+  Example Arduino Usage
+  ------------------------------------------------------------------------------
+  1.  // If using modePinLow = true, when the pin pulls low we take a reading
+      if(!digitalRead(3)){ // Pin 3 is our modePin monitoring pin
+        Serial.println(myLidarLite.distanceContinuous());
+      }
+
+============================================================================= */
+int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
+  byte distanceArray[2]; // Array to store high and low bytes of distance
+  read(0x8f,2,distanceArray,false,0x62); // Read two bytes from register 0x8f. (See autoincrement note above)
+  int distance = (distanceArray[0] << 8) + distanceArray[1]; // Shift high byte and add to low byte
+  return(distance);
+}
 /* =============================================================================
   Velocity Scaling
 
