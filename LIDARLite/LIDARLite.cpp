@@ -399,7 +399,7 @@ int LIDARLite::signalStrength(char LidarLiteI2cAddress){
 }
 
 /* =============================================================================
-  Correlation Record
+  Correlation Record To Array
 
   Distance measurements are based on the storage and processing of reference and
   signal correlation records. The correlation waveform has a bipolar wave shape,
@@ -422,6 +422,7 @@ int LIDARLite::signalStrength(char LidarLiteI2cAddress){
 
   Parameters
   ------------------------------------------------------------------------------
+  - arrayToSave: The array for saving the correlation record
   - numberOfReadings (optional): default is 256, max is 1024
   - LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite
     address. If you change the address, fill it in here.
@@ -431,11 +432,36 @@ int LIDARLite::signalStrength(char LidarLiteI2cAddress){
   1.  // Default usage, correlationRecordArray will hold the correlation record
       int *correlationRecordArray;
       myLidarLiteInstance.distance();
-      correlationRecordArray = myLidarLiteInstance.correlationRecord();
+      myLidarLiteInstance.correlationRecordToArray(correlationRecordArray);
 
   =========================================================================== */
-int* LIDARLite::correlationRecord(int numberOfReadings, char LidarLiteI2cAddress){
-  int correlationRecord[numberOfReadings];
+void LIDARLite::correlationRecordToArray(int *arrayToSave, int numberOfReadings, char LidarLiteI2cAddress){
+
+    // Array to store read values
+    byte correlationArray[2];
+    // Var to store value of correlation record
+    int correlationValue = 0;
+    //  Selects memory bank
+    write(0x5d,0xc0,LidarLiteI2cAddress);
+    // Sets test mode select
+    write(0x40, 0x07,LidarLiteI2cAddress);
+    for(int i = 0; i<numberOfReadings; i++){
+      // Select single byte
+      read(0xd2,2,correlationArray,false,LidarLiteI2cAddress);
+      //  Low byte is the value of the correlation record
+      correlationValue = (int)correlationArray[0];
+      // if upper byte lsb is set, the value is negative
+      if(correlationArray[1] == 1){
+        correlationValue |= 0xff00;
+      }
+      arrayToSave[i] = correlationValue;
+    }
+    // Send null command to control register
+    write(0x40,0x00,LidarLiteI2cAddress);
+  }
+
+void LIDARLite::correlationRecordToSerial(char separator, int numberOfReadings, char LidarLiteI2cAddress){
+
   // Array to store read values
   byte correlationArray[2];
   // Var to store value of correlation record
@@ -448,16 +474,16 @@ int* LIDARLite::correlationRecord(int numberOfReadings, char LidarLiteI2cAddress
     // Select single byte
     read(0xd2,2,correlationArray,false,LidarLiteI2cAddress);
     //  Low byte is the value of the correlation record
-    correlationValue = (int)correlationArray[0];
+    correlationValue = correlationArray[0];
     // if upper byte lsb is set, the value is negative
     if((int)correlationArray[1] == 1){
       correlationValue |= 0xff00;
     }
-    correlationRecord[i] = correlationValue;
+    Serial.print((int)correlationValue);
+    Serial.print(separator);
   }
   // Send null command to control register
   write(0x40,0x00,LidarLiteI2cAddress);
-  return correlationRecord;
 }
 
 /* =============================================================================

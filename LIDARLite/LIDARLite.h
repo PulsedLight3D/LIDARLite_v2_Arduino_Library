@@ -12,7 +12,8 @@ class LIDARLite
       void scale(char, char = 0x62);
       int velocity(char = 0x62);
       int signalStrength(char = 0x62);
-      int* correlationRecord(int = 256, char = 0x62);
+      void correlationRecordToArray(int*,int = 256, char = 0x62);
+      void correlationRecordToSerial(char = '\n', int = 256, char = 0x62);
       unsigned char changeAddress(char, bool = false, char = 0x62);
       void write(char, char, char = 0x62);
       void read(char, int, byte*, bool, char);

@@ -1,7 +1,5 @@
 /* =============================================================================
-  LIDAR-Lite v2: Single Sensor, get and print the correlation record
-
-  This example demonstrates how to get and print the correlation record.
+  LIDAR-Lite v2: Single Sensor, print the correlation record to the serial port
 
   The library is in BETA, so subscribe to the github repo to recieve updates, or
   just check in periodically:
@@ -14,7 +12,6 @@
 #include <LIDARLite.h>
 
 LIDARLite myLidarLite;
-int *correlationRecordArray;
 
 void setup() {
   Serial.begin(115200);
@@ -26,12 +23,6 @@ void loop() {
   Serial.print("Distance: ");
   Serial.println(myLidarLite.distance());
 
-  correlationRecordArray = myLidarLite.correlationRecord();
-  Serial.print("Correlation Record: ");
-
-  for (int i=0;i<256;i++){
-    Serial.print(correlationRecordArray[i]);
-      Serial.print(", ");
-  }
+  myLidarLite.correlationRecordToSerial();
   Serial.println("Correlation Record Complete");
 }
