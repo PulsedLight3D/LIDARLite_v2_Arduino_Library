@@ -85,6 +85,26 @@ void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, 
       TWBR = ((F_CPU / 400000UL) - 16) / 2; // Set I2C frequency to 400kHz
     #endif
   }
+  configure(configuration, LidarLiteI2cAddress);
+}
+/* =============================================================================
+
+  Configure
+
+  Sets the configuration for the sensor, typically this is done in the begin()
+  command, but sometimes (especially for multi-sensor applications) you will
+  need to do this separately.
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - configuration: set the configuration for the sensor
+    - default or 0 = equivelent to writing 0x00 to 0x00, i.e. full reset of
+      sensor, if you write nothing for configuration or 0, the sensor will init-
+      iate normally
+    - 1 = high speed setting, set the aquisition count to 1/3 the default (works
+      great for stronger singles) can be a little noisier
+============================================================================= */
+void LIDARLite::configure(int configuration, char LidarLiteI2cAddress){
   switch (configuration){
     case 0: //  Default configuration
     break;
@@ -540,6 +560,8 @@ void LIDARLite::correlationRecordToSerial(char separator, int numberOfReadings, 
 unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryAddress, char currentLidarLiteAddress){
   //  Array to save the serial number
   unsigned char serialNumber[2];
+  unsigned char newI2cAddressArray[1];
+
   //  Read two bytes from 0x96 to get the serial number
   read(0x96,2,serialNumber,false,currentLidarLiteAddress);
   //  Write the low byte of the serial number to 0x18
@@ -548,25 +570,91 @@ unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryA
   write(0x19,serialNumber[1],currentLidarLiteAddress);
   //  Write the new address to 0x1a
   write(0x1a,newI2cAddress,currentLidarLiteAddress);
+
+
+  while(newI2cAddress != newI2cAddressArray[0]){
+    read(0x1a,1,newI2cAddressArray,false,currentLidarLiteAddress);
+  }
+  Serial.print("WIN!");
   //  Choose whether or not to use the default address of 0x62
   if(disablePrimaryAddress){
     write(0x1e,0x08,currentLidarLiteAddress);
   }else{
     write(0x1e,0x00,currentLidarLiteAddress);
   }
+
   return newI2cAddress;
 }
 
 /* =============================================================================
+  Change I2C Address for Multiple Sensors
+
+  Using the new I2C address change feature, you can also change the address for
+  multiple sensors using the PWR_EN line connected to Arduino's digital pins.
+
+  Address changes will be lost on power off.
+
+  Process
+  ------------------------------------------------------------------------------
+  1.
+  Parameters
+  ------------------------------------------------------------------------------
+  - numberOfSensors: int representing the number of sensors you have connected
+  - pinArray: array of the digital pins your sensors' PWR_EN line is connected
+    to
+  - i2cAddressArray: array of the I2C address you want to assign to your sen-
+    sors, the order should reflect the order of the pinArray (see not for poss-
+    ible addresses below)
+  - usePartyLine(optional): true/false value of weather or not to leave 0x62
+    available to all sensors for write (default is false)
+
+  Example Usage
+  ------------------------------------------------------------------------------
+  1.  //  Assign new address to the sensors connected to sensorsPins and disable
+      //  0x62 as a partyline to talk to all of the sensors
+      int sensorPins[] = {2,3,4};
+      unsigned char addresses[] = {0x66,0x68,0x64};
+      myLidarLiteInstance.changeAddressMultisensor(3,sensorPins,addresses);
+
+  Notes
+  ------------------------------------------------------------------------------
+    Possible Address for LIDAR-Lite
+
+    7-bit address in binary form need to end in "0". Example: 0x62 = 01100010 so
+    that works well for us. Essentially any even numbered hex value will work
+    for 7-bit address.
+
+    8-bit read address in binary form need to end in "00". Example: the default
+    8-bit read address for LIDAR-Lite is 0xc4 = 011000100. Essentially any hex
+    value evenly divisable by "4" will work.
+
   =========================================================================== */
-void LIDARLite::write(char myAddress, char myValue, char LidarLiteI2cAddress){
-  Wire.beginTransmission((int)LidarLiteI2cAddress);
-  Wire.write((int)myAddress);
-  Wire.write((int)myValue);
-  int nackCatcher = Wire.endTransmission();
-  if(nackCatcher != 0){Serial.println("> nack");}
-  delay(1);
-}
+  void LIDARLite::changeAddressMultiPwrEn(int numOfSensors, int *pinArray, unsigned char *i2cAddressArray, bool usePartyLine){
+    for (int i = 0; i < numOfSensors; i++){
+      pinMode(pinArray[i], OUTPUT); // Pin to first LIDAR-Lite Power Enable line
+      delay(2);
+      digitalWrite(pinArray[i], HIGH);
+      delay(20);
+      configure(1);
+      changeAddress(i2cAddressArray[i],true); // We have to turn off the party line to actually get these to load
+    }
+    if(usePartyLine){
+      for (int i = 0; i < numOfSensors; i++){
+        write(0x1e,0x00,i2cAddressArray[i]);
+      }
+    }
+  }
+
+  /* =============================================================================
+    =========================================================================== */
+  void LIDARLite::write(char myAddress, char myValue, char LidarLiteI2cAddress){
+    Wire.beginTransmission((int)LidarLiteI2cAddress);
+    Wire.write((int)myAddress);
+    Wire.write((int)myValue);
+    int nackCatcher = Wire.endTransmission();
+    if(nackCatcher != 0){Serial.println("> nack");}
+    delay(1);
+  }
 
 /* =============================================================================
   =========================================================================== */

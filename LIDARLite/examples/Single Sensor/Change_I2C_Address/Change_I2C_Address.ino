@@ -22,7 +22,7 @@ void setup() {
   // We assign the sensor the address of 0x66, and the false flag
   // tells the sensor to stop responding to 0x62
 
-  myLidarLite.changeI2cAddress(0x66,false);
+  myLidarLite.changeAddress(0x66,false);
 }
 
 void loop() {
