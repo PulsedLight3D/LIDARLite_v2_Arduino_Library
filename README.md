@@ -2,24 +2,55 @@
 
 ***NOTE:*** *This library is created specifically for LIDAR-Lite version 2 with the "Blue Label". See [http://pulsedlight3d.com](http://pulsedlight3d.com) for more information.*
 
+The purpose of this library is two-fold:
 
-  LIDARLite Arduino Library:
+1. Quick access all the basic functions of LIDAR-Lite via Arduino without worrying about specifics
+2. By reading through this library, users of any platform will get an explanation of how to use the various functions of LIDAR-Lite and see an Arduino example along side.
 
-  The purpose of this library is two-fold:
-  1.  Quick access all the basic functions of LIDAR-Lite via Arduino without
-      worrying about specifics
-  2.  By reading through this library, users of any platform will get an
-      explanation of how to use the various functions of LIDAR-Lite and see an
-      Arduino example along side.
+Visit http://pulsedlight3d.com for documentation and support requests
 
-  This libary was written by Austin Meyers (AK5A) with PulsedLight Inc. And was likely downloaded from:
+# Installation
 
-  https://github.com/PulsedLight3D/LIDARLite_v2_Arduino_Library
+*Coming soon*
 
-  Visit http://pulsedlight3d.com for documentation and support requests
+# Wiring Diagrams
 
+## Basic I2C Wiring
 
-# Functions
+The capacitor shown in these diagrams was useful with version one of the sensor and now is a virtual requirement because of the higher speeds of the sensor. 
+
+### Pinout
+
+![Basic I2C Wiring: Pinout](Diagrams/PinoutI2CWiring.png)
+
+### Arduino
+![Basic I2C Wiring: Arduino](Diagrams/ArduinoI2CWiring.png)
+
+## PWM Wiring
+
+### Pinout
+![PWM Wiring: Pinout](Diagrams/PinoutPWMWiring.png)
+
+### Arduino
+![PWM Wiring: Arduino](Diagrams/ArduinoPWMWiring.png)
+
+## Continuous Mode Wiring
+
+### Pinout
+![Continuous Mode Wiring: Arduino](Diagrams/PinoutContinuousModeWiring.png)
+
+### Arduino
+![Continuous Mode Wiring: Arduino](Diagrams/ArduinoContinuousModeWiring.png)
+
+## Multi Sensor PWR_EN Wiring
+
+*Coming soon (August 6, 2015)!*
+
+# Example Sketches
+
+*Soon this will be a listing and explanation of the example sketches in the library, for now look throught the LIDARLite/examples folder*
+
+# Library Functions
 
 ## Begin
 
@@ -43,6 +74,7 @@ Starts the sensor and I2C
 
 ### Function
 
+```c++    
     void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, char LidarLiteI2cAddress){
       errorReporting = showErrorReporting;
       Wire.begin(); //  Start I2C
@@ -55,6 +87,7 @@ Starts the sensor and I2C
       }
       configure(configuration, LidarLiteI2cAddress);
     }
+```
 
 ## Configure
 
@@ -70,6 +103,7 @@ Sets the configuration for the sensor, typically this is done in the begin() com
 
 ### Function
 
+```c++    
     void LIDARLite::configure(int configuration, char LidarLiteI2cAddress){
       switch (configuration){
         case 0: //  Default configuration
@@ -80,7 +114,7 @@ Sets the configuration for the sensor, typically this is done in the begin() com
         break;
       }
     }
-
+```
 
 ## Begin Continuous
 
@@ -95,19 +129,22 @@ Continuous mode allows you to tell the sensor to take a certain number (or infin
 
 ### Parameters
 
-- modePinLow (optional): default is true, if true the Mode pin will pull low when a new measurement is availble
-- interval (optional): set the time between measurements, default is 0x04
-- numberOfReadings(optional): sets the number of readings to take before stopping (Note: even though the sensor will stop taking new readings, 0x8f will still read back the last recorded value), default value is 0xff (which sets the sensor to take infinite readings without stopping). Minimum value for operation is 0x02.
-- LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
+- **modePinLow (optional)**: default is true, if true the Mode pin will pull low when a new measurement is availble
+- **interval (optional)**: set the time between measurements, default is 0x04
+- **numberOfReadings(optional)**: sets the number of readings to take before stopping (Note: even though the sensor will stop taking new readings, 0x8f will still read back the last recorded value), default value is 0xff (which sets the sensor to take infinite readings without stopping). Minimum value for operation is 0x02.
+- **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 ### Example Arduino Usage
 
+```c++    
 	// Setup I2C then setup continuous mode
 	myLidarLiteInstance.begin();
 	myLidarLiteInstance.beginContinuous();
+```
 
 ### Function
 
+```c++    
     void LIDARLite::beginContinuous(bool modePinLow, char interval, char numberOfReadings,char LidarLiteI2cAddress){
       //  Register 0x45 sets the time between measurements. 0xc8 corresponds to 10Hz
       //  while 0x13 corresponds to 100Hz. Minimum value is 0x02 for proper
@@ -126,7 +163,7 @@ Continuous mode allows you to tell the sensor to take a certain number (or infin
       //  Initiate reading distance
       write(0x00,0x04,LidarLiteI2cAddress);
     }
-
+```
 
 ## Distance
 
@@ -143,12 +180,12 @@ Read the distance from LIDAR-Lite
 
 ### Parameters
 
-- stablizePreampFlag (optional): Default: true, take aquisition with DC stabilization/correction. If set to false, it will read
-- faster, but you will need to sabilize DC every once in awhile (ex. 1 out of every 100 readings is typically good).
-- LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
+- **stablizePreampFlag (optional)**: Default: true, take aquisition with DC stabilization/correction. If set to false, it will read faster, but you will need to sabilize DC every once in awhile (ex. 1 out of every 100 readings is typically good).
+- **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 ### Example Arduino Usage
 
+```c++    
 	// take a reading with DC stabilization and the 0x62 default i2c address
 	// the distance variable will hold the distance
 	int distance = 0
@@ -161,6 +198,7 @@ Read the distance from LIDAR-Lite
 	// take a reading with DC stabilization and a custom i2c address of 0x66
 	int distance = 0
 	distance = myLidarLiteInstance.distance(true,0x66);
+```
 
 ### Notes
 
@@ -176,6 +214,7 @@ with the high byte set to "1", ergo it autoincrements.
 
 ### Function
 
+```c++    
     int LIDARLite::distance(bool stablizePreampFlag, bool takeReference, char LidarLiteI2cAddress){
       if(stablizePreampFlag){
         // Take acquisition & correlation processing with DC correction
@@ -192,6 +231,7 @@ with the high byte set to "1", ergo it autoincrements.
       int distance = (distanceArray[0] << 8) + distanceArray[1];
       return(distance);
     }
+```    
 
 ## Distance Continuous
 
@@ -204,25 +244,28 @@ register 0x8f
 
 ### Parameters
 
-- LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
+- **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 
 ### Example Arduino Usage
 
+```c++    
 	// If using modePinLow = true, when the pin pulls low we take a reading
 	if(!digitalRead(3)){ // Pin 3 is our modePin monitoring pin
 		Serial.println(myLidarLite.distanceContinuous());
 	}
+```
 
 ### Function
 
+```c++    
     int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
       byte distanceArray[2]; // Array to store high and low bytes of distance
       read(0x8f,2,distanceArray,false,0x62); // Read two bytes from register 0x8f. (See autoincrement note above)
       int distance = (distanceArray[0] << 8) + distanceArray[1]; // Shift high byte and add to low byte
       return(distance);
     }
-
+```
 
 ## Velocity Scaling
 
@@ -240,27 +283,29 @@ Measurement Period (ms)|Velocity 0x68 Load Value| Register| velocityScalingValue
 
 ### Parameters
 
-- velocityScalingValue: interger to choose the velocity scaling value, refer to the table above
-- LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
+- **velocityScalingValue**: interger to choose the velocity scaling value, refer to the table above
+- **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 ### Example Usage
 
-
+```c++    
 	// By default you don't need to set the scaling value, the sensor defaults
   	// to 0xC8 for register 0x68 or 0.10m/s
 
 	// Set the velocity scaling to 1m/s
 	myLidarLiteInstance.scale(4);
+```
 
 ### Function 
 
+```c++    
     void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
       //  Array of velocity scaling values
       unsigned char scale[] = {0xC8, 0x50, 0x28, 0x14};
       //  Write scaling value to register 0x68 to set
       write(0x68,scale[velocityScalingValue],LidarLiteI2cAddress);
     }
-
+```
 
 ## Velocity
 
@@ -278,10 +323,11 @@ A velocity is measured by observing the change in distance over a fixed time per
 
 ### Parameters
 
-- LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
+- **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 ### Example Usage
 
+```c++    
 	//  Basic usage with default i2c address, the velocity variable will hold
 	//  the velocity measurement
 	int velocity = 0;
@@ -290,9 +336,11 @@ A velocity is measured by observing the change in distance over a fixed time per
 	//  Get velocity with custom i2c address of 0x66
 	int velocity = 0;
 	velocity = myLidarLiteInstance.velocity(0x66);
+```
 
 ### Function
-  
+
+```c++      
     int LIDARLite::velocity(char LidarLiteI2cAddress){
       //  Write 0x04 to register 0x00 to start getting distance readings
       write(0x00,0x04,LidarLiteI2cAddress);
@@ -306,7 +354,7 @@ A velocity is measured by observing the change in distance over a fixed time per
       //  city measurement
       return((int)((char)velocityArray[0]));
     }
-
+```
 
 ## Signal Strength
 
@@ -326,17 +374,20 @@ Reflectivity characteristics of the target's surface also affect the amount of r
 
 ### Parameters
 
-- LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
+- **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 ### Example Usage
 
+```c++    
 	//  Basic usage with default i2c address, the signalStrength variable will
 	//  hold the signalStrength measurement
 	int signalStrength = 0;
 	signalStrength = myLidarLiteInstance.signalStrength();
+```
 
 ### Function
 
+```c++    
     int LIDARLite::signalStrength(char LidarLiteI2cAddress){
       //  Array to store read value
       byte signalStrengthArray[1];
@@ -344,7 +395,7 @@ Reflectivity characteristics of the target's surface also affect the amount of r
       read(0x0e, 1, signalStrengthArray, false, 0x62);
       return((int)((unsigned char)signalStrengthArray[0]));
     }
-
+```
 
 ## Correlation Record To Array
 
@@ -363,19 +414,22 @@ Distance measurements are based on the storage and processing of reference and s
 
 ### Parameters
 
-- arrayToSave: The array for saving the correlation record
-- numberOfReadings (optional): default is 256, max is 1024
-- LidarLiteI2cAddress (optional): Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
+- **arrayToSave**: The array for saving the correlation record
+- **numberOfReadings (optional)**: default is 256, max is 1024
+- **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 ### Example Usage
 
+```c++    
 	// Default usage, correlationRecordArray will hold the correlation record
 	int *correlationRecordArray;
 	myLidarLiteInstance.distance();
 	myLidarLiteInstance.correlationRecordToArray(correlationRecordArray);
+```
 
 ### Function
-  
+
+```c++      
     void LIDARLite::correlationRecordToArray(int *arrayToSave, int numberOfReadings, char LidarLiteI2cAddress){
       // Array to store read values
       byte correlationArray[2];
@@ -399,11 +453,13 @@ Distance measurements are based on the storage and processing of reference and s
       // Send null command to control register
       write(0x40,0x00,LidarLiteI2cAddress);
     }
+```
 
 ## Correlation Record To Serial Port
 
 ### Function
 
+```c++    
     void LIDARLite::correlationRecordToSerial(char separator, int numberOfReadings, char LidarLiteI2cAddress){
 
       // Array to store read values
@@ -429,7 +485,7 @@ Distance measurements are based on the storage and processing of reference and s
       // Send null command to control register
       write(0x40,0x00,LidarLiteI2cAddress);
     }
-
+```
 
 ## Change I2C Address for Single Sensor
 
@@ -449,16 +505,17 @@ There are only certain address that will work with LIDAR-Lite so be sure to revi
 
 ### Parameters
 
-- newI2cAddress: the hex value of the I2C address you want the sensor to have
-- disablePrimaryAddress (optional): true/false value to disable the primary address, default is false (i.e. leave primary active)
-- currentLidarLiteAddress (optional): the default is 0x62, but can also be any value you have previously set (ex. if you set the address to 0x66 and disabled the default address then needed to change it, you would use 0x66 here)
+- **newI2cAddress**: the hex value of the I2C address you want the sensor to have
+- **disablePrimaryAddress (optional)**: true/false value to disable the primary address, default is false (i.e. leave primary active)
+- **currentLidarLiteAddress (optional)**: the default is 0x62, but can also be any value you have previously set (ex. if you set the address to 0x66 and disabled the default address then needed to change it, you would use 0x66 here)
 
 ### Example Usage
 
+```c++    
 	//  Set the value to 0x66 with primary address active and starting with
 	//  0x62 as the current address
 	myLidarLiteInstance.changeAddress(0x66);
-
+```
 
 ### Notes
 
@@ -469,7 +526,8 @@ There are only certain address that will work with LIDAR-Lite so be sure to revi
 8-bit read address in binary form need to end in "00". Example: the default 8-bit read address for LIDAR-Lite is 0xc4 = 011000100. Essentially any hex value evenly divisable by "4" will work.
 
 ### Function
-  
+
+```c++      
     unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryAddress, char currentLidarLiteAddress){
       //  Array to save the serial number
       unsigned char serialNumber[2];
@@ -498,7 +556,7 @@ There are only certain address that will work with LIDAR-Lite so be sure to revi
 
       return newI2cAddress;
     }
-
+```
 
 ## Change I2C Address for Multiple Sensors
 
@@ -508,22 +566,23 @@ Address changes will be lost on power off.
 
 ### Process
 
-1.
 
 ### Parameters
 
-- numberOfSensors: int representing the number of sensors you have connected
-- pinArray: array of the digital pins your sensors' PWR_EN line is connected to
-- i2cAddressArray: array of the I2C address you want to assign to your sensors, the order should reflect the order of the pinArray (see not for possible addresses below)
-- usePartyLine(optional): true/false value of weather or not to leave 0x62 available to all sensors for write (default is false)
+- **numberOfSensors**: int representing the number of sensors you have connected
+- **pinArray**: array of the digital pins your sensors' PWR_EN line is connected to
+- **i2cAddressArray**: array of the I2C address you want to assign to your sensors, the order should reflect the order of the pinArray (see not for possible addresses below)
+- **usePartyLine(optional)**: true/false value of weather or not to leave 0x62 available to all sensors for write (default is false)
 
 ### Example Usage
 
+```c++    
 	//  Assign new address to the sensors connected to sensorsPins and disable
 	//  0x62 as a partyline to talk to all of the sensors
 	int sensorPins[] = {2,3,4};
 	unsigned char addresses[] = {0x66,0x68,0x64};
 	myLidarLiteInstance.changeAddressMultisensor(3,sensorPins,addresses);
+```
 
 ### Notes
 
@@ -534,7 +593,8 @@ Address changes will be lost on power off.
 8-bit read address in binary form need to end in "00". Example: the default 8-bit read address for LIDAR-Lite is 0xc4 = 011000100. Essentially any hex value evenly divisable by "4" will work.
 
 ### Function
-  
+
+```c++      
   	void LIDARLite::changeAddressMultiPwrEn(int numOfSensors, int *pinArray, unsigned char *i2cAddressArray, bool usePartyLine){
       for (int i = 0; i < numOfSensors; i++){
         pinMode(pinArray[i], OUTPUT); // Pin to first LIDAR-Lite Power Enable line
@@ -550,6 +610,7 @@ Address changes will be lost on power off.
         }
       }
     }
+```
 
 ## Write to LIDAR-Lite
 
@@ -574,6 +635,7 @@ LIDAR-Lite requires a STOP then START from I2C, not a repeated START. If you're 
 
 ### Function
 
+```c++    
     void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool monitorBusyFlag, char LidarLiteI2cAddress){
       int busyFlag = 0;
       if(monitorBusyFlag){
@@ -635,3 +697,4 @@ LIDAR-Lite requires a STOP then START from I2C, not a repeated START. If you're 
           Serial.println("> Bailout");
       }
     }
+```
