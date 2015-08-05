@@ -70,8 +70,11 @@ The capacitor shown in these diagrams was useful with version one of the sensor 
 
 ## Multi-sensor PWR_EN Wiring
 
-*Coming soon (August 6, 2015)!*
+### Pinout
+![Multi-sensor PWR_EN Wiring: Arduino](Diagrams/PinoutMultiSensorPWR.png)
 
+### Arduino
+![Multi-sensor PWR_EN Wiring: Arduino](Diagrams/ArduinoMultiSensorPWR.png)
 # Example Sketches
 
 *Soon this will be a listing and explanation of the example sketches in the library, for now look throught the LIDARLite/examples folder*
