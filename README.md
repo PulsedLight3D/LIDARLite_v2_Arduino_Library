@@ -554,7 +554,8 @@ Address changes will be lost on power off.
 ## Write to LIDAR-Lite
 
 ### Function
-    
+
+```c++    
     void LIDARLite::write(char myAddress, char myValue, char LidarLiteI2cAddress){
       Wire.beginTransmission((int)LidarLiteI2cAddress);
       Wire.write((int)myAddress);
@@ -563,6 +564,7 @@ Address changes will be lost on power off.
       if(nackCatcher != 0){Serial.println("> nack");}
       delay(1);
     }
+```    
 
 ## Read from LIDAR-Lite
 
