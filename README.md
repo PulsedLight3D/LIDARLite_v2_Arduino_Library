@@ -9,6 +9,32 @@ The purpose of this library is two-fold:
 
 Visit http://pulsedlight3d.com for documentation and support requests
 
+This readme has the following sections: 
+
+- Installation
+- Wiring Diagrams
+	- Basic I2C Wiring
+	- PWM Wiring
+	- Continuous Mode Wiring
+	- Multi-sensor PWR_EN Wiring
+- Example Sketches
+- Library Functions
+	- begin
+	- configure
+	- beginContinuous
+	- fast
+	- distance
+	- distanceContinuous
+	- scale
+	- velocity
+	- signalStrength
+	- correlationRecordToArray
+	- correlationRecordToSerial
+	- changeAddress
+	- changeAddressMultiPwrEn
+	- write
+	- read
+
 # Installation
 
 *Coming soon*
@@ -42,7 +68,7 @@ The capacitor shown in these diagrams was useful with version one of the sensor 
 ### Arduino
 ![Continuous Mode Wiring: Arduino](Diagrams/ArduinoContinuousModeWiring.png)
 
-## Multi Sensor PWR_EN Wiring
+## Multi-sensor PWR_EN Wiring
 
 *Coming soon (August 6, 2015)!*
 
