@@ -21,7 +21,7 @@ LIDARLite myLidarLite;
 void setup() {
   Serial.begin(115200);
   myLidarLite.begin();
-  myLidarLite.changeAddressMultisensor(3,sensorPins,addresses,false);
+  myLidarLite.changeAddressMultiPwrEn(3,sensorPins,addresses,false);
 }
 
 void loop() {

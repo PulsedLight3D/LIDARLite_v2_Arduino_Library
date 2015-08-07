@@ -15,21 +15,6 @@
 
   Visit http://pulsedlight3d.com for documentation and support requests
 
-  To Do
-  ------------------------------------------------------------------------------
-  - Test correlation record by graphing it
-  - New Functions
-    - Multisensor address change by serial number
-    - Multisensor address change by broadcast to all to get serial, then write
-      to serial number
-    - Sensor get serial number! (do this then Change address)
-
-  Changelog
-  ------------------------------------------------------------------------------
-  - 7/23/15:
-    - Removed "fast" command, redudant
-  - 7/17/15: Initial Commit
-
 ============================================================================= */
 
 #include <Arduino.h>
