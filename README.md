@@ -105,7 +105,7 @@ This example file demonstrates how to take distance measurements as fast as poss
 This example file will demonstrate how to tell the sensor to take a continous set of readings by writing the speed and number of measruments directly to the sensor, freeing the micro-controller to read when it is ready. We will con- figure the MODE pin to pull low when a new measrument is available.
 ### [Distance_Single](LIDARLite/examples/Single%20Sensor/Distance_Single/Distance_Single.ino)
 This example file demonstrates how to take a single distance measurement with LIDAR-Lite v2 "Blue Label".
-### [PWM (Coming Soon)](LIDARLite/examples/Single%20Sensor/PWM/PWM.ino
+### [PWM (Coming Soon)](LIDARLite/examples/Single%20Sensor/PWM/PWM.ino)
 This example demonstrates how to read measurements from LIDAR-Lite v2 "Blue Label" using PWM
 ### [PWM_and_I2C (Coming Soon)](LIDARLite/examples/Single%20Sensor/PWM_and_I2C/PWM_and_I2C.ino)
 This example file will demonstrate how to use PWM and I2C at the same time, an exciting new feature of LIDAR-Lite
