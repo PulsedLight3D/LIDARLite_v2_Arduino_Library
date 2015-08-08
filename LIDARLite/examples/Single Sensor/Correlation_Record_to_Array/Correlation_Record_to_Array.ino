@@ -1,5 +1,8 @@
 /* =============================================================================
-  LIDAR-Lite v2: Single Sensor, get the correlation record as an array and print
+  LIDAR-Lite v2: Single Sensor, get the correlation record as an array
+
+  This example demostrates how to get the correlation record as an array and
+  print it to the serial port
 
   The library is in BETA, so subscribe to the github repo to recieve updates, or
   just check in periodically:

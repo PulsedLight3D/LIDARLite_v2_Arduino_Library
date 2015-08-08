@@ -11,27 +11,41 @@ Visit http://pulsedlight3d.com for documentation and support requests
 
 This readme has the following sections:
 
-- [Installation](#introduction)
+- [Installation](#installation)
 - [Wiring Diagrams](#wiring-diagrams)
 	- [Basic I2C Wiring](#basic-i2c-wiring)
 	- [PWM Wiring](#pwm-wiring)
 	- [Continuous Mode Wiring](#continuous-mode-wiring)
 	- [Multi-sensor PWR_EN Wiring](#multi-sensor-pwr_en-wiring)
 - [Example Sketches](#example-sketches)
-- Library Functions
-	- begin
-	- configure
-	- beginContinuous
-	- fast
-	- distance
-	- distanceContinuous
-	- scale
-	- velocity
-	- signalStrength
-	- correlationRecordToArray
-	- correlationRecordToSerial
-	- changeAddress
-	- changeAddressMultiPwrEn
+	- Single Sensor
+		- Change_I2C_Address
+		- Correlation_Record_to_Array
+		- Correlation_Record_to_Serial
+		- Distance_as_Fast_as_Possible
+		- Distance_Continuous
+		- Distance_Single
+		- PWM
+		- PWM_and_I2C
+		- Second_Return_Detect
+		- Second_Return_Disable_Strongest
+		- Velocity_Single
+	- Multiple Sensors
+		- Change_I2C_Addresses
+- [Library Functions](#library-functions)
+	- [begin](#begin)
+	- [configure](#configure)
+	- [beginContinuous](#beginContinuous)
+	- [fast](#fast)
+	- [distance](#distance)
+	- [distanceContinuous](#distanceContinuous)
+	- [scale](#scale)
+	- [velocity](#velocity)
+	- [signalStrength](#signalStrength)
+	- [correlationRecordToArray](#correlationRecordToArray)
+	- [correlationRecordToSerial](#correlationRecordToSerial)
+	- [changeAddress](#changeAddress)
+	- [changeAddressMultiPwrEn](#changeAddressMultiPwrEn)
 	- write
 	- read
 
@@ -77,7 +91,36 @@ The capacitor shown in these diagrams was useful with version one of the sensor 
 ![Multi-sensor PWR_EN Wiring: Arduino](Diagrams/ArduinoMultiSensorPWR.png)
 # Example Sketches
 
-*Soon this will be a listing and explanation of the example sketches in the library, for now look through the LIDARLite/examples folder*
+## Single Sensor
+
+### [Change_I2C_Address](LIDARLite/examples/Single%20Sensor/Change_I2C_Address/Change_I2C_Address.ino)
+This example demonstrates how to chage the i2c address of a single sensor.
+### Correlation_Record_to_Array
+This example demostrates how to get the correlation record as an array and print it to the serial port
+### Correlation_Record_to_Serial
+This library demostrates how to print the correlation record to the serial port
+### Distance_as_Fast_as_Possible
+This example file demonstrates how to take distance measurements as fast as possible, when you first plug-in a LIDAR-Lite into an Arduino it runs 250 measurements per second (250Hz). Then if we setup the sensor by reducing the aquisiton record count by 1/3 and incresing the i2c communication speed from 100kHz to 400kHz we get about 500 measurements per second (500Hz). Now if we throttle the reference and preamp stabilization processes during the distance measurement process we can increase the number of measurements to about 750 per second (750Hz).
+### Distance_Continuous
+This example file will demonstrate how to tell the sensor to take a continous set of readings by writing the speed and number of measruments directly to the sensor, freeing the micro-controller to read when it is ready. We will con- figure the MODE pin to pull low when a new measrument is available.
+### Distance_Single
+This example file demonstrates how to take a single distance measurement with LIDAR-Lite v2 "Blue Label".
+### PWM (Coming Soon)
+This example demonstrates how to read measurements from LIDAR-Lite v2 "Blue Label" using PWM
+### PWM_and_I2C  (Coming Soon)
+This example file will demonstrate how to use PWM and I2C at the same time, an exciting new feature of LIDAR-Lite
+### Second_Return_Detect (Coming Soon)
+This example will demostrate how to detect a second return, and if detected print the value
+### Second_Return_Disable_Strongest (Coming Soon)
+This example will demostrate how to disable showing strongest signal return  and print the second return if one is availble. This kind of approach can help  with window and chain link fence detection situation (amungst others).
+### Velocity_Single
+This example show how to read velocity with LIDAR-Lite "Blue Label" (V2)
+
+## Multiple Sensors
+
+### Change_I2C_Addresses
+This example demonstrates how to chage the i2c address of multiple sensors.
+
 
 # Library Functions
 

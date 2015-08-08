@@ -1,6 +1,9 @@
 /* =============================================================================
   LIDAR-Lite v2: Single Sensor, print the correlation record to the serial port
 
+  This library demostrates how to print the correlation record to the serial 
+  port
+
   The library is in BETA, so subscribe to the github repo to recieve updates, or
   just check in periodically:
   https://github.com/PulsedLight3D/LIDARLite_v2_Arduino_Library
