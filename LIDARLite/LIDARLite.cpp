@@ -92,10 +92,20 @@ void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, 
 void LIDARLite::configure(int configuration, char LidarLiteI2cAddress){
   switch (configuration){
     case 0: //  Default configuration
+      write(0x00,0x00,LidarLiteI2cAddress);
     break;
     case 1: //  Set aquisition count to 1/3 default value, faster reads, slightly
             //  noisier values
       write(0x04,0x00,LidarLiteI2cAddress);
+    break;
+    case 2: //  Low noise, low sensitivity: Pulls decision criteria higher
+            //  above the noise, allows fewer false detections, reduces
+            //  sensitivity
+      write(0x1c,0x20,LidarLiteI2cAddress);
+    break;
+    case 3: //  High noise, high sensitivity: Pulls decision criteria into the
+            //  noise, allows more false detections, increses sensitivity
+      write(0x1c,0x60,LidarLiteI2cAddress);
     break;
   }
 }
@@ -646,7 +656,7 @@ unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryA
 void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool monitorBusyFlag, char LidarLiteI2cAddress){
   int busyFlag = 0;
   if(monitorBusyFlag){
-    int busyFlag = 1;
+    busyFlag = 1;
   }
   int busyCounter = 0;
   while(busyFlag != 0){
@@ -656,6 +666,7 @@ void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool m
     if(nackCatcher != 0){Serial.println("> nack");}
     Wire.requestFrom((int)LidarLiteI2cAddress,1);
     busyFlag = bitRead(Wire.read(),0);
+
     busyCounter++;
     if(busyCounter > 9999){
       if(errorReporting){
