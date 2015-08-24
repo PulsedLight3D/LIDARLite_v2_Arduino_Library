@@ -51,7 +51,7 @@ This readme has the following sections:
 
 # Installation
 
-To install, download this repo put the "LIDARLite" folder in your Arduino "libraries" folder. If you need help, follow the instructions here: [http://arduino.cc/en/Guide/Libraries](http://arduino.cc/en/Guide/Libraries)
+To install, download this repo put the "LIDARLite" (**which is inside the "LIDARLite_v2_Arduino_Library-master"**) folder in your Arduino "libraries" folder (**make sure you put "LIDARLite at the root of the librarires folder and not the entire repo**). If you need help, follow the instructions here: [http://arduino.cc/en/Guide/Libraries](http://arduino.cc/en/Guide/Libraries)
 
 # Wiring Diagrams
 
