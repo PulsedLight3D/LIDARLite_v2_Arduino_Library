@@ -690,6 +690,11 @@ void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool m
           Serial.print("> Error Code from Register 0x40: ");
           Serial.println(errorCode[0]);
           delay(20);
+          Wire.beginTransmission((int)LidarLiteI2cAddress);
+          Wire.write((int)0x00);
+          Wire.write((int)0x00);
+          nackCatcher = Wire.endTransmission();
+          if(nackCatcher != 0){Serial.println("> nack");}
         }
        }
       goto bailout;
