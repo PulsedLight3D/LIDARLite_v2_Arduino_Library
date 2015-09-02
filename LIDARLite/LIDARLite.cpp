@@ -409,7 +409,7 @@ int LIDARLite::signalStrength(char LidarLiteI2cAddress){
   //  Array to store read value
   byte signalStrengthArray[1];
   //  Read one byte from 0x0e
-  read(0x0e, 1, signalStrengthArray, false, 0x62);
+  read(0x0e, 1, signalStrengthArray, false, LidarLiteI2cAddress);
   return((int)((unsigned char)signalStrengthArray[0]));
 }
 
