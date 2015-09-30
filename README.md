@@ -139,7 +139,7 @@ Starts the sensor and I2C
 
 - **configuration**: set the configuration for the sensor
 	- default or 0 = equivelent to writing 0x00 to 0x00, i.e. full reset of sensor, if you write nothing for configuration or 0, the sensor will initiate normally
-    - 1 = high speed setting, set the aquisition count to 1/3 the default (works great for stronger singles) can be a little noisier
+    - 1 = high speed setting, set the acquisition count to 1/3 the default (works great for stronger singles) can be a little noisier
 - **fasti2c**: if true i2c frequency is 400kHz, default is 100kHz
 - **showErrorReporting**: if true reads with errors will print the value of 0x40, used primarily for debugging purposes by PulsedLight
 - **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
@@ -170,7 +170,7 @@ Sets the configuration for the sensor, typically this is done in the begin() com
     - **default or 0** = equivelent to writing 0x00 to 0x00, i.e. full reset of
       sensor, if you write nothing for configuration or 0, the sensor will init-
       iate normally
-    - **1** = high speed setting, set the aquisition count to 1/3 the default (works
+    - **1** = high speed setting, set the acquisition count to 1/3 the default (works
       great for stronger singles) can be a little noisier
 
 ### Function
@@ -180,7 +180,7 @@ Sets the configuration for the sensor, typically this is done in the begin() com
       switch (configuration){
         case 0: //  Default configuration
         break;
-        case 1: //  Set aquisition count to 1/3 default value, faster reads, slightly
+        case 1: //  Set acquisition count to 1/3 default value, faster reads, slightly
                 //  noisier values
           write(0x04,0x00,LidarLiteI2cAddress);
         break;
@@ -243,7 +243,7 @@ Read the distance from LIDAR-Lite
 
 ### Process
 
-1.  Write 0x04 to register 0x00 to initiate an aquisition.
+1.  Write 0x04 to register 0x00 to initiate an acquisition.
 2.  Read register 0x01 (this is handled in the read() command)
 	- if the first bit is "1" then the sensor is busy, loop until the first bit is "0"
 	- if the first bit is "0" then the sensor is ready
@@ -252,7 +252,7 @@ Read the distance from LIDAR-Lite
 
 ### Parameters
 
-- **stablizePreampFlag (optional)**: Default: true, take aquisition with DC stabilization/correction. If set to false, it will read faster, but you will need to sabilize DC every once in awhile (ex. 1 out of every 100 readings is typically good).
+- **stablizePreampFlag (optional)**: Default: true, take acquisition with DC stabilization/correction. If set to false, it will read faster, but you will need to sabilize DC every once in awhile (ex. 1 out of every 100 readings is typically good).
 - **LidarLiteI2cAddress (optional)**: Default: 0x62, the default LIDAR-Lite address. If you change the address, fill it in here.
 
 ### Example Arduino Usage
@@ -385,7 +385,7 @@ A velocity is measured by observing the change in distance over a fixed time per
 
 ### Process
 
-1.  Write 0x04 to register 0x00 to initiate an aquisition.
+1.  Write 0x04 to register 0x00 to initiate an acquisition.
 2.  Write 0x80 to register 0x04 to switch to velocity mode
 3.  Read register 0x01
 	- if the first bit is "1" then the sensor is busy, loop until the first
