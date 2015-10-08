@@ -302,7 +302,7 @@ void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
   //  Array of velocity scaling values
   unsigned char scale[] = {0xC8, 0x50, 0x28, 0x14};
   //  Write scaling value to register 0x68 to set
-  write(0x68,scale[velocityScalingValue],LidarLiteI2cAddress);
+  write(0x45,scale[velocityScalingValue],LidarLiteI2cAddress);
 }
 
 /* =============================================================================
@@ -344,10 +344,10 @@ void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
 
   =========================================================================== */
 int LIDARLite::velocity(char LidarLiteI2cAddress){
+  // //  Write 0xa0 to 0x04 to switch on velocity mode
+   write(0x04,0xa0,LidarLiteI2cAddress);
   //  Write 0x04 to register 0x00 to start getting distance readings
   write(0x00,0x04,LidarLiteI2cAddress);
-  //  Write 0x80 to 0x04 to switch on velocity mode
-  write(0x04,0x80,LidarLiteI2cAddress);
   //  Array to store bytes from read function
   byte velocityArray[1];
   //  Read 1 byte from register 0x09 to get velocity measurement
