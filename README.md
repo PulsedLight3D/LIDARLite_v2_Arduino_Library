@@ -341,7 +341,7 @@ register 0x8f
 
 ## Velocity Scaling
 
-Measurement Period (ms)|Velocity 0x68 Load Value| Register| velocityScalingValue
+Measurement Period (ms)|Velocity 0x45 Load Value| Register| velocityScalingValue
 :-----------| :---------------| :---------------| :-------------------
 100         | 0.10 m/s        | 0xC8 (default)  | 1
 40          | 0.25 m/s        | 0x50            | 2
@@ -351,7 +351,7 @@ Measurement Period (ms)|Velocity 0x68 Load Value| Register| velocityScalingValue
 
 ### Process
 
-1. Write the velocity scaling value from the table above to register 0x68
+1. Write the velocity scaling value from the table above to register 0x45
 
 ### Parameters
 
@@ -362,7 +362,7 @@ Measurement Period (ms)|Velocity 0x68 Load Value| Register| velocityScalingValue
 
 ```c++
 	// By default you don't need to set the scaling value, the sensor defaults
-  	// to 0xC8 for register 0x68 or 0.10m/s
+  	// to 0xC8 for register 0x45 or 0.10m/s
 
 	// Set the velocity scaling to 1m/s
 	myLidarLiteInstance.scale(4);
@@ -374,14 +374,14 @@ Measurement Period (ms)|Velocity 0x68 Load Value| Register| velocityScalingValue
     void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
       //  Array of velocity scaling values
       unsigned char scale[] = {0xC8, 0x50, 0x28, 0x14};
-      //  Write scaling value to register 0x68 to set
-      write(0x68,scale[velocityScalingValue],LidarLiteI2cAddress);
+      //  Write scaling value to register 0x45 to set
+      write(0x45,scale[velocityScalingValue],LidarLiteI2cAddress);
     }
 ```
 
 ## Velocity
 
-A velocity is measured by observing the change in distance over a fixed time period. The default time period is 100 ms resulting in a velocity calibration of .1 m/s. Velocity mode is selected by setting the most significant bit of internal register 4 to one. When a distance measurement is initiated by writing a 3 or 4 (no dc compensation/or update compensation respectively) to command register 0, two successive distance measurements result with a time delay defined by the value loaded into register at address 0x68.
+A velocity is measured by observing the change in distance over a fixed time period. The default time period is 100 ms resulting in a velocity calibration of .1 m/s. Velocity mode is selected by setting the most significant bit of internal register 4 to one. When a distance measurement is initiated by writing a 3 or 4 (no dc compensation/or update compensation respectively) to command register 0, two successive distance measurements result with a time delay defined by the value loaded into register at address 0x45.
 
 ### Process
 

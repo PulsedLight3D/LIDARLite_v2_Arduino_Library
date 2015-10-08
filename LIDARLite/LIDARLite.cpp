@@ -270,7 +270,7 @@ int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
   Velocity Scaling
 
   Measurement | Velocity        | Register        | velocityScalingValue
-  Period (ms) | Scaling (m/sec) | 0x68 Load Value |
+  Period (ms) | Scaling (m/sec) | 045 Load Value |
   :-----------| :---------------| :---------------| :-------------------
   100         | 0.10 m/s        | 0xC8 (default)  | 1
   40          | 0.25 m/s        | 0x50            | 2
@@ -279,7 +279,7 @@ int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
 
   Process
   ------------------------------------------------------------------------------
-  1. Write the velocity scaling value from the table above to register 0x68
+  1. Write the velocity scaling value from the table above to register 0x45
 
   Parameters
   ------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
   Example Usage
   ------------------------------------------------------------------------------
   1.  // By default you don't need to set the scaling value, the sensor defaults
-      // to 0xC8 for register 0x68 or 0.10m/s
+      // to 0xC8 for register 0x45 or 0.10m/s
 
   2.  // Set the velocity scaling to 1m/s
       myLidarLiteInstance.scale(4);
@@ -301,7 +301,7 @@ int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
 void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
   //  Array of velocity scaling values
   unsigned char scale[] = {0xC8, 0x50, 0x28, 0x14};
-  //  Write scaling value to register 0x68 to set
+  //  Write scaling value to register 0x45 to set
   write(0x45,scale[velocityScalingValue],LidarLiteI2cAddress);
 }
 
@@ -314,7 +314,7 @@ void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
   internal register 4 to one. When a distance measurement is initiated by writ-
   ing a 3 or 4 (no dc compensation/or update compensation respectively) to com-
   mand register 0, two successive distance measurements result with a time delay
-  defined by the value loaded into register at address 0x68.
+  defined by the value loaded into register at address 0x45.
 
   Process
   ------------------------------------------------------------------------------
