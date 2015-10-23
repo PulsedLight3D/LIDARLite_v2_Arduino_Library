@@ -300,7 +300,7 @@ int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
 
 void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
   //  Array of velocity scaling values
-  unsigned char scale[] = {0xC8, 0x50, 0x28, 0x14};
+  unsigned char scale[] = {0xc8, 0x50, 0x28, 0x14};
   //  Write scaling value to register 0x45 to set
   write(0x45,scale[velocityScalingValue],LidarLiteI2cAddress);
 }
