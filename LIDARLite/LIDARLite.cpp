@@ -640,6 +640,80 @@ void LIDARLite::changeAddressMultiPwrEn(int numOfSensors, int *pinArray, unsigne
   }
 }
 
+
+/* =============================================================================
+  Change the offset of one LIDAR-Lite laser
+
+  The offset will be resseted on shut down. The offset is complement to two in hex.
+  You can easily convert it with : "byte(int8_t(value))"
+
+  Process
+  ------------------------------------------------------------------------------
+  1.  Write the offset to the register 0x13
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - offset: the hex value of the wanted offset (complement to 2)
+  - LidarLiteI2CAddress (optional): true/false value to disable the primary
+    address, default is false (i.e. leave primary active)
+  
+  Example Usage
+  ------------------------------------------------------------------------------
+  myLidarLiteInstance.changeOffset(0x11); // add 17 to the default address
+  myLidarLiteInstance.changeOffset(0xF0, 0x68); // remove 16 the distance read from 0x68 
+
+  Notes
+  ------------------------------------------------------------------------------
+  It will NOT be resetted if you set ENABLE pin is low.
+ 
+
+  =========================================================================== */
+void LIDARLite::changeOffset(byte offset, char LidarLiteI2CAddress){
+  write(0x13, byte(offset), LidarLiteI2CAddress);
+}
+
+/* =============================================================================
+  Change the offset of one or more LIDAR-Lite laser
+
+  The offset will be resseted on shut down. The offset is an 8 bit signed integer, 
+  and is computed by this function.  
+  more simplicity, you can use the changeOffsetMult function which accept a signed
+  integer.
+
+  Process
+  ------------------------------------------------------------------------------
+  1. loop _number times
+  1b. Write the offset to the registers 0x13
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - _number: Number of lasers 
+  - offset: An array of _number signed integer on 8 bits (int8_t) of the wanted 
+  offset (complement to 2). 
+  - LidarLiteI2CAddress (optional): true/false value to disable the primary
+    address, default is false (i.e. leave primary active)
+  
+  Example Usage
+  ------------------------------------------------------------------------------
+  unsigned char addresses[] = {0x64, 0x66, 0x68, 0x6A};
+  int8_t offsets[] = {-100, 50,50,-50};
+  myLidarLite.changeOffsetMult(4, offsets, addresses);
+
+  Notes
+  ------------------------------------------------------------------------------
+  It will NOT be resetted if you set ENABLE pin is low.
+
+  Using an int8_t already uses the complement to two. So we do not need to convert 
+  values, we already got the right form !
+ 
+
+  =========================================================================== */
+void LIDARLite::changeOffsetMult(int _number, int8_t *_offsetArray, unsigned char *_i2cAddressArray){
+  for(int i = 0; i < _number; i++){
+    changeOffset(byte(_offsetArray[i]), _i2cAddressArray[i]);
+  }
+}
+
 /* =============================================================================
   =========================================================================== */
 void LIDARLite::write(char myAddress, char myValue, char LidarLiteI2cAddress) {
