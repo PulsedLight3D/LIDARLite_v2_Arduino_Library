@@ -30,7 +30,7 @@
 ============================================================================= */
 bool LIDARLite::errorReporting = false;
 
-LIDARLite::LIDARLite(){}
+LIDARLite::LIDARLite() {}
 
 /* =============================================================================
 
@@ -60,15 +60,15 @@ LIDARLite::LIDARLite(){}
     address. If you change the address, fill it in here.
 
 ============================================================================= */
-void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, char LidarLiteI2cAddress){
+void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, char LidarLiteI2cAddress) {
   errorReporting = showErrorReporting;
   Wire.begin(); //  Start I2C
-  if(fasti2c){
-    #if ARDUINO >= 157
-      Wire.setClock(400000UL); // Set I2C frequency to 400kHz, for the Due
-    #else
-      TWBR = ((F_CPU / 400000UL) - 16) / 2; // Set I2C frequency to 400kHz
-    #endif
+  if (fasti2c) {
+#if ARDUINO >= 157
+    Wire.setClock(400000UL); // Set I2C frequency to 400kHz, for the Due
+#else
+    TWBR = ((F_CPU / 400000UL) - 16) / 2; // Set I2C frequency to 400kHz
+#endif
   }
   configure(configuration, LidarLiteI2cAddress);
 }
@@ -89,23 +89,23 @@ void LIDARLite::begin(int configuration, bool fasti2c, bool showErrorReporting, 
     - 1 = high speed setting, set the aquisition count to 1/3 the default (works
       great for stronger singles) can be a little noisier
 ============================================================================= */
-void LIDARLite::configure(int configuration, char LidarLiteI2cAddress){
-  switch (configuration){
-    case 0: //  Default configuration
-      write(0x00,0x00,LidarLiteI2cAddress);
+void LIDARLite::configure(int configuration, char LidarLiteI2cAddress) {
+  switch (configuration) {
+  case 0: //  Default configuration
+    write(0x00, 0x00, LidarLiteI2cAddress);
     break;
-    case 1: //  Set aquisition count to 1/3 default value, faster reads, slightly
-            //  noisier values
-      write(0x04,0x00,LidarLiteI2cAddress);
+  case 1: //  Set aquisition count to 1/3 default value, faster reads, slightly
+    //  noisier values
+    write(0x04, 0x00, LidarLiteI2cAddress);
     break;
-    case 2: //  Low noise, low sensitivity: Pulls decision criteria higher
-            //  above the noise, allows fewer false detections, reduces
-            //  sensitivity
-      write(0x1c,0x20,LidarLiteI2cAddress);
+  case 2: //  Low noise, low sensitivity: Pulls decision criteria higher
+    //  above the noise, allows fewer false detections, reduces
+    //  sensitivity
+    write(0x1c, 0x20, LidarLiteI2cAddress);
     break;
-    case 3: //  High noise, high sensitivity: Pulls decision criteria into the
-            //  noise, allows more false detections, increses sensitivity
-      write(0x1c,0x60,LidarLiteI2cAddress);
+  case 3: //  High noise, high sensitivity: Pulls decision criteria into the
+    //  noise, allows more false detections, increses sensitivity
+    write(0x1c, 0x60, LidarLiteI2cAddress);
     break;
   }
 }
@@ -146,23 +146,23 @@ void LIDARLite::configure(int configuration, char LidarLiteI2cAddress){
       myLidarLiteInstance.beginContinuous();
 
 ============================================================================= */
-void LIDARLite::beginContinuous(bool modePinLow, char interval, char numberOfReadings,char LidarLiteI2cAddress){
+void LIDARLite::beginContinuous(bool modePinLow, char interval, char numberOfReadings, char LidarLiteI2cAddress) {
   //  Register 0x45 sets the time between measurements. 0xc8 corresponds to 10Hz
   //  while 0x13 corresponds to 100Hz. Minimum value is 0x02 for proper
   //  operation.
-  write(0x45,interval,LidarLiteI2cAddress);
+  write(0x45, interval, LidarLiteI2cAddress);
   //  Set register 0x04 to 0x20 to look at "NON-default" value of velocity scale
   //  If you set bit 0 of 0x04 to "1" then the mode pin will be low when done
-  if(modePinLow){
-    write(0x04,0x21,LidarLiteI2cAddress);
-  }else{
-    write(0x04,0x20,LidarLiteI2cAddress);
+  if (modePinLow) {
+    write(0x04, 0x21, LidarLiteI2cAddress);
+  } else {
+    write(0x04, 0x20, LidarLiteI2cAddress);
   }
   //  Set the number of readings, 0xfe = 254 readings, 0x01 = 1 reading and
   //  0xff = continuous readings
-  write(0x11,numberOfReadings,LidarLiteI2cAddress);
+  write(0x11, numberOfReadings, LidarLiteI2cAddress);
   //  Initiate reading distance
-  write(0x00,0x04,LidarLiteI2cAddress);
+  write(0x00, 0x04, LidarLiteI2cAddress);
 }
 
 /* =============================================================================
@@ -219,21 +219,21 @@ void LIDARLite::beginContinuous(bool modePinLow, char interval, char numberOfRea
     with the high byte set to "1", ergo it autoincrements.
 
 ============================================================================= */
-int LIDARLite::distance(bool stablizePreampFlag, bool takeReference, char LidarLiteI2cAddress){
-  if(stablizePreampFlag){
+int LIDARLite::distance(bool stablizePreampFlag, bool takeReference, char LidarLiteI2cAddress) {
+  if (stablizePreampFlag) {
     // Take acquisition & correlation processing with DC correction
-    write(0x00,0x04,LidarLiteI2cAddress);
-  }else{
+    write(0x00, 0x04, LidarLiteI2cAddress);
+  } else {
     // Take acquisition & correlation processing without DC correction
-    write(0x00,0x03,LidarLiteI2cAddress);
+    write(0x00, 0x03, LidarLiteI2cAddress);
   }
   // Array to store high and low bytes of distance
   byte distanceArray[2];
   // Read two bytes from register 0x8f. (See autoincrement note above)
-  read(0x8f,2,distanceArray,true,LidarLiteI2cAddress);
+  read(0x8f, 2, distanceArray, true, LidarLiteI2cAddress);
   // Shift high byte and add to low byte
   int distance = (distanceArray[0] << 8) + distanceArray[1];
-  return(distance);
+  return (distance);
 }
 
 /* =============================================================================
@@ -260,11 +260,11 @@ int LIDARLite::distance(bool stablizePreampFlag, bool takeReference, char LidarL
       }
 
 ============================================================================= */
-int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
+int LIDARLite::distanceContinuous(char LidarLiteI2cAddress) {
   byte distanceArray[2]; // Array to store high and low bytes of distance
-  read(0x8f,2,distanceArray,false,0x62); // Read two bytes from register 0x8f. (See autoincrement note above)
+  read(0x8f, 2, distanceArray, false, LidarLiteI2cAddress); // Read two bytes from register 0x8f. (See autoincrement note above)
   int distance = (distanceArray[0] << 8) + distanceArray[1]; // Shift high byte and add to low byte
-  return(distance);
+  return (distance);
 }
 /* =============================================================================
   Velocity Scaling
@@ -298,11 +298,11 @@ int LIDARLite::distanceContinuous(char LidarLiteI2cAddress){
 
   =========================================================================== */
 
-void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
+void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress) {
   //  Array of velocity scaling values
   unsigned char scale[] = {0xc8, 0x50, 0x28, 0x14};
   //  Write scaling value to register 0x45 to set
-  write(0x45,scale[velocityScalingValue],LidarLiteI2cAddress);
+  write(0x45, scale[velocityScalingValue], LidarLiteI2cAddress);
 }
 
 /* =============================================================================
@@ -343,18 +343,18 @@ void LIDARLite::scale(char velocityScalingValue, char LidarLiteI2cAddress){
       velocity = myLidarLiteInstance.velocity(0x66);
 
   =========================================================================== */
-int LIDARLite::velocity(char LidarLiteI2cAddress){
+int LIDARLite::velocity(char LidarLiteI2cAddress) {
   // //  Write 0xa0 to 0x04 to switch on velocity mode
-   write(0x04,0xa0,LidarLiteI2cAddress);
+  write(0x04, 0xa0, LidarLiteI2cAddress);
   //  Write 0x04 to register 0x00 to start getting distance readings
-  write(0x00,0x04,LidarLiteI2cAddress);
+  write(0x00, 0x04, LidarLiteI2cAddress);
   //  Array to store bytes from read function
   byte velocityArray[1];
   //  Read 1 byte from register 0x09 to get velocity measurement
-  read(0x09,1,velocityArray,true,LidarLiteI2cAddress);
+  read(0x09, 1, velocityArray, true, LidarLiteI2cAddress);
   //  Convert 1 byte to char and then to int to get signed int value for velo-
   //  city measurement
-  return((int)((char)velocityArray[0]));
+  return ((int)((char)velocityArray[0]));
 }
 
 /* =============================================================================
@@ -405,12 +405,12 @@ int LIDARLite::velocity(char LidarLiteI2cAddress){
       signalStrength = myLidarLiteInstance.signalStrength();
 
   =========================================================================== */
-int LIDARLite::signalStrength(char LidarLiteI2cAddress){
+int LIDARLite::signalStrength(char LidarLiteI2cAddress) {
   //  Array to store read value
   byte signalStrengthArray[1];
   //  Read one byte from 0x0e
   read(0x0e, 1, signalStrengthArray, false, LidarLiteI2cAddress);
-  return((int)((unsigned char)signalStrengthArray[0]));
+  return ((int)((unsigned char)signalStrengthArray[0]));
 }
 
 /* =============================================================================
@@ -450,55 +450,55 @@ int LIDARLite::signalStrength(char LidarLiteI2cAddress){
       myLidarLiteInstance.correlationRecordToArray(correlationRecordArray);
 
   =========================================================================== */
-void LIDARLite::correlationRecordToArray(int *arrayToSave, int numberOfReadings, char LidarLiteI2cAddress){
-
-    // Array to store read values
-    byte correlationArray[2];
-    // Var to store value of correlation record
-    int correlationValue = 0;
-    //  Selects memory bank
-    write(0x5d,0xc0,LidarLiteI2cAddress);
-    // Sets test mode select
-    write(0x40, 0x07,LidarLiteI2cAddress);
-    for(int i = 0; i<numberOfReadings; i++){
-      // Select single byte
-      read(0xd2,2,correlationArray,false,LidarLiteI2cAddress);
-      //  Low byte is the value of the correlation record
-      correlationValue = (int)correlationArray[0];
-      // if upper byte lsb is set, the value is negative
-      if(correlationArray[1] == 1){
-        correlationValue |= 0xff00;
-      }
-      arrayToSave[i] = correlationValue;
-    }
-    // Send null command to control register
-    write(0x40,0x00,LidarLiteI2cAddress);
-  }
-
-void LIDARLite::correlationRecordToSerial(char separator, int numberOfReadings, char LidarLiteI2cAddress){
+void LIDARLite::correlationRecordToArray(int *arrayToSave, int numberOfReadings, char LidarLiteI2cAddress) {
 
   // Array to store read values
   byte correlationArray[2];
   // Var to store value of correlation record
   int correlationValue = 0;
   //  Selects memory bank
-  write(0x5d,0xc0,LidarLiteI2cAddress);
+  write(0x5d, 0xc0, LidarLiteI2cAddress);
   // Sets test mode select
-  write(0x40, 0x07,LidarLiteI2cAddress);
-  for(int i = 0; i<numberOfReadings; i++){
+  write(0x40, 0x07, LidarLiteI2cAddress);
+  for (int i = 0; i < numberOfReadings; i++) {
     // Select single byte
-    read(0xd2,2,correlationArray,false,LidarLiteI2cAddress);
+    read(0xd2, 2, correlationArray, false, LidarLiteI2cAddress);
+    //  Low byte is the value of the correlation record
+    correlationValue = (int)correlationArray[0];
+    // if upper byte lsb is set, the value is negative
+    if (correlationArray[1] == 1) {
+      correlationValue |= 0xff00;
+    }
+    arrayToSave[i] = correlationValue;
+  }
+  // Send null command to control register
+  write(0x40, 0x00, LidarLiteI2cAddress);
+}
+
+void LIDARLite::correlationRecordToSerial(char separator, int numberOfReadings, char LidarLiteI2cAddress) {
+
+  // Array to store read values
+  byte correlationArray[2];
+  // Var to store value of correlation record
+  int correlationValue = 0;
+  //  Selects memory bank
+  write(0x5d, 0xc0, LidarLiteI2cAddress);
+  // Sets test mode select
+  write(0x40, 0x07, LidarLiteI2cAddress);
+  for (int i = 0; i < numberOfReadings; i++) {
+    // Select single byte
+    read(0xd2, 2, correlationArray, false, LidarLiteI2cAddress);
     //  Low byte is the value of the correlation record
     correlationValue = correlationArray[0];
     // if upper byte lsb is set, the value is negative
-    if((int)correlationArray[1] == 1){
+    if ((int)correlationArray[1] == 1) {
       correlationValue |= 0xff00;
     }
     Serial.print((int)correlationValue);
     Serial.print(separator);
   }
   // Send null command to control register
-  write(0x40,0x00,LidarLiteI2cAddress);
+  write(0x40, 0x00, LidarLiteI2cAddress);
 }
 
 /* =============================================================================
@@ -552,30 +552,30 @@ void LIDARLite::correlationRecordToSerial(char separator, int numberOfReadings, 
 
 
   =========================================================================== */
-unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryAddress, char currentLidarLiteAddress){
+unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryAddress, char currentLidarLiteAddress) {
   //  Array to save the serial number
   unsigned char serialNumber[2];
   unsigned char newI2cAddressArray[1];
 
   //  Read two bytes from 0x96 to get the serial number
-  read(0x96,2,serialNumber,false,currentLidarLiteAddress);
+  read(0x96, 2, serialNumber, false, currentLidarLiteAddress);
   //  Write the low byte of the serial number to 0x18
-  write(0x18,serialNumber[0],currentLidarLiteAddress);
+  write(0x18, serialNumber[0], currentLidarLiteAddress);
   //  Write the high byte of the serial number of 0x19
-  write(0x19,serialNumber[1],currentLidarLiteAddress);
+  write(0x19, serialNumber[1], currentLidarLiteAddress);
   //  Write the new address to 0x1a
-  write(0x1a,newI2cAddress,currentLidarLiteAddress);
+  write(0x1a, newI2cAddress, currentLidarLiteAddress);
 
 
-  while(newI2cAddress != newI2cAddressArray[0]){
-    read(0x1a,1,newI2cAddressArray,false,currentLidarLiteAddress);
+  while (newI2cAddress != newI2cAddressArray[0]) {
+    read(0x1a, 1, newI2cAddressArray, false, currentLidarLiteAddress);
   }
   Serial.print("WIN!");
   //  Choose whether or not to use the default address of 0x62
-  if(disablePrimaryAddress){
-    write(0x1e,0x08,currentLidarLiteAddress);
-  }else{
-    write(0x1e,0x00,currentLidarLiteAddress);
+  if (disablePrimaryAddress) {
+    write(0x1e, 0x08, currentLidarLiteAddress);
+  } else {
+    write(0x1e, 0x00, currentLidarLiteAddress);
   }
 
   return newI2cAddress;
@@ -624,67 +624,141 @@ unsigned char LIDARLite::changeAddress(char newI2cAddress,  bool disablePrimaryA
     value evenly divisable by "4" will work.
 
   =========================================================================== */
-  void LIDARLite::changeAddressMultiPwrEn(int numOfSensors, int *pinArray, unsigned char *i2cAddressArray, bool usePartyLine){
-    for (int i = 0; i < numOfSensors; i++){
-      pinMode(pinArray[i], OUTPUT); // Pin to first LIDAR-Lite Power Enable line
-      delay(2);
-      digitalWrite(pinArray[i], HIGH);
-      delay(20);
-      configure(1);
-      changeAddress(i2cAddressArray[i],true); // We have to turn off the party line to actually get these to load
-    }
-    if(usePartyLine){
-      for (int i = 0; i < numOfSensors; i++){
-        write(0x1e,0x00,i2cAddressArray[i]);
-      }
+void LIDARLite::changeAddressMultiPwrEn(int numOfSensors, int *pinArray, unsigned char *i2cAddressArray, bool usePartyLine) {
+  for (int i = 0; i < numOfSensors; i++) {
+    pinMode(pinArray[i], OUTPUT); // Pin to first LIDAR-Lite Power Enable line
+    delay(2);
+    digitalWrite(pinArray[i], HIGH);
+    delay(20);
+    configure(1);
+    changeAddress(i2cAddressArray[i], true); // We have to turn off the party line to actually get these to load
+  }
+  if (usePartyLine) {
+    for (int i = 0; i < numOfSensors; i++) {
+      write(0x1e, 0x00, i2cAddressArray[i]);
     }
   }
+}
 
-  /* =============================================================================
-    =========================================================================== */
-  void LIDARLite::write(char myAddress, char myValue, char LidarLiteI2cAddress){
-    Wire.beginTransmission((int)LidarLiteI2cAddress);
-    Wire.write((int)myAddress);
-    Wire.write((int)myValue);
-    int nackCatcher = Wire.endTransmission();
-    if(nackCatcher != 0){Serial.println("> nack");}
-    delay(1);
+
+/* =============================================================================
+  Change the offset of one LIDAR-Lite laser
+
+  The offset will be resseted on shut down. The offset is complement to two in hex.
+  You can easily convert it with : "byte(int8_t(value))"
+
+  Process
+  ------------------------------------------------------------------------------
+  1.  Write the offset to the register 0x13
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - offset: the hex value of the wanted offset (complement to 2)
+  - LidarLiteI2CAddress (optional): true/false value to disable the primary
+    address, default is false (i.e. leave primary active)
+  
+  Example Usage
+  ------------------------------------------------------------------------------
+  myLidarLiteInstance.changeOffset(0x11); // add 17 to the default address
+  myLidarLiteInstance.changeOffset(0xF0, 0x68); // remove 16 the distance read from 0x68 
+
+  Notes
+  ------------------------------------------------------------------------------
+  It will NOT be resetted if you set ENABLE pin is low.
+ 
+
+  =========================================================================== */
+void LIDARLite::changeOffset(byte offset, char LidarLiteI2CAddress){
+  write(0x13, byte(offset), LidarLiteI2CAddress);
+}
+
+/* =============================================================================
+  Change the offset of one or more LIDAR-Lite laser
+
+  The offset will be resseted on shut down. The offset is an 8 bit signed integer, 
+  and is computed by this function.  
+  more simplicity, you can use the changeOffsetMult function which accept a signed
+  integer.
+
+  Process
+  ------------------------------------------------------------------------------
+  1. loop _number times
+  1b. Write the offset to the registers 0x13
+
+  Parameters
+  ------------------------------------------------------------------------------
+  - _number: Number of lasers 
+  - offset: An array of _number signed integer on 8 bits (int8_t) of the wanted 
+  offset (complement to 2). 
+  - LidarLiteI2CAddress (optional): true/false value to disable the primary
+    address, default is false (i.e. leave primary active)
+  
+  Example Usage
+  ------------------------------------------------------------------------------
+  unsigned char addresses[] = {0x64, 0x66, 0x68, 0x6A};
+  int8_t offsets[] = {-100, 50,50,-50};
+  myLidarLite.changeOffsetMult(4, offsets, addresses);
+
+  Notes
+  ------------------------------------------------------------------------------
+  It will NOT be resetted if you set ENABLE pin is low.
+
+  Using an int8_t already uses the complement to two. So we do not need to convert 
+  values, we already got the right form !
+ 
+
+  =========================================================================== */
+void LIDARLite::changeOffsetMult(int _number, int8_t *_offsetArray, unsigned char *_i2cAddressArray){
+  for(int i = 0; i < _number; i++){
+    changeOffset(byte(_offsetArray[i]), _i2cAddressArray[i]);
   }
+}
 
 /* =============================================================================
   =========================================================================== */
-void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool monitorBusyFlag, char LidarLiteI2cAddress){
+void LIDARLite::write(char myAddress, char myValue, char LidarLiteI2cAddress) {
+  Wire.beginTransmission((int)LidarLiteI2cAddress);
+  Wire.write((int)myAddress);
+  Wire.write((int)myValue);
+  int nackCatcher = Wire.endTransmission();
+  if (nackCatcher != 0) {Serial.println("> nack");}
+  delay(1);
+}
+
+/* =============================================================================
+  =========================================================================== */
+void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool monitorBusyFlag, char LidarLiteI2cAddress) {
   int busyFlag = 0;
-  if(monitorBusyFlag){
+  if (monitorBusyFlag) {
     busyFlag = 1;
   }
   int busyCounter = 0;
-  while(busyFlag != 0){
+  while (busyFlag != 0) {
     Wire.beginTransmission((int)LidarLiteI2cAddress);
     Wire.write(0x01);
     int nackCatcher = Wire.endTransmission();
-    if(nackCatcher != 0){Serial.println("> nack");}
-    Wire.requestFrom((int)LidarLiteI2cAddress,1);
-    busyFlag = bitRead(Wire.read(),0);
+    if (nackCatcher != 0) {Serial.println("> nack");}
+    Wire.requestFrom((int)LidarLiteI2cAddress, 1);
+    busyFlag = bitRead(Wire.read(), 0);
 
     busyCounter++;
-    if(busyCounter > 9999){
-      if(errorReporting){
+    if (busyCounter > 9999) {
+      if (errorReporting) {
         int errorExists = 0;
         Wire.beginTransmission((int)LidarLiteI2cAddress);
         Wire.write(0x01);
         int nackCatcher = Wire.endTransmission();
-        if(nackCatcher != 0){Serial.println("> nack");}
-        Wire.requestFrom((int)LidarLiteI2cAddress,1);
-        errorExists = bitRead(Wire.read(),0);
-        if(errorExists){
+        if (nackCatcher != 0) {Serial.println("> nack");}
+        Wire.requestFrom((int)LidarLiteI2cAddress, 1);
+        errorExists = bitRead(Wire.read(), 0);
+        if (errorExists) {
           unsigned char errorCode[] = {0x00};
           Wire.beginTransmission((int)LidarLiteI2cAddress);    // Get the slave's attention, tell it we're sending a command byte
           Wire.write(0x40);
           delay(20);
           int nackCatcher = Wire.endTransmission();                  // "Hang up the line" so others can use it (can have multiple slaves & masters connected)
-          if(nackCatcher != 0){Serial.println("> nack");}
-          Wire.requestFrom((int)LidarLiteI2cAddress,1);
+          if (nackCatcher != 0) {Serial.println("> nack");}
+          Wire.requestFrom((int)LidarLiteI2cAddress, 1);
           errorCode[0] = Wire.read();
           delay(10);
           Serial.print("> Error Code from Register 0x40: ");
@@ -694,29 +768,29 @@ void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool m
           Wire.write((int)0x00);
           Wire.write((int)0x00);
           nackCatcher = Wire.endTransmission();
-          if(nackCatcher != 0){Serial.println("> nack");}
+          if (nackCatcher != 0) {Serial.println("> nack");}
         }
-       }
+      }
       goto bailout;
     }
   }
-  if(busyFlag == 0){
+  if (busyFlag == 0) {
     Wire.beginTransmission((int)LidarLiteI2cAddress);
     Wire.write((int)myAddress);
     int nackCatcher = Wire.endTransmission();
-    if(nackCatcher != 0){Serial.println("NACK");}
+    if (nackCatcher != 0) {Serial.println("NACK");}
     Wire.requestFrom((int)LidarLiteI2cAddress, numOfBytes);
     int i = 0;
-    if(numOfBytes <= Wire.available()){
-      while(i < numOfBytes){
+    if (numOfBytes <= Wire.available()) {
+      while (i < numOfBytes) {
         arrayToSave[i] = Wire.read();
         i++;
       }
     }
   }
-  if(busyCounter > 9999){
-    bailout:
-      busyCounter = 0;
-      Serial.println("> Bailout");
+  if (busyCounter > 9999) {
+bailout:
+    busyCounter = 0;
+    Serial.println("> Bailout");
   }
 }

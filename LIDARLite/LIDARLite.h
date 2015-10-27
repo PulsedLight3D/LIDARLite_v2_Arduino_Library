@@ -16,6 +16,8 @@ class LIDARLite
       void correlationRecordToArray(int*,int = 256, char = 0x62);
       void correlationRecordToSerial(char = '\n', int = 256, char = 0x62);
       unsigned char changeAddress(char, bool = false, char = 0x62);
+      void changeOffset(byte, char = 0x62);
+      void changeOffsetMult(int, int8_t*, unsigned char* );
       void changeAddressMultiPwrEn(int , int* , unsigned char* , bool = false);
       void write(char, char, char = 0x62);
       void read(char, int, byte*, bool, char);
